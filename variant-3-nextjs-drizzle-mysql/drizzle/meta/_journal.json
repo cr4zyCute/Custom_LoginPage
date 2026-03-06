@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "mysql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1772796084646,
+      "tag": "0000_nostalgic_adam_warlock",
+      "breakpoints": true
+    }
+  ]
+}
