@@ -21,7 +21,7 @@ export function ThemeCard({ theme, onSelect }: ThemeCardProps) {
 
   if (!config) return <div className="p-4 border border-red-500">Invalid Config</div>
 
-  const { colors } = config
+  const { colors, assets } = config
 
   // Helper to get color style
   const style = {
@@ -45,7 +45,7 @@ export function ThemeCard({ theme, onSelect }: ThemeCardProps) {
         className="aspect-video w-full relative border-b overflow-hidden"
         style={style}
       >
-        <ThemePreview layout={theme.layout} />
+        <ThemePreview layout={theme.layout} backgroundImage={assets?.backgroundImage} />
       </div>
 
       {/* Info & Action */}
@@ -76,7 +76,7 @@ export function ThemeCard({ theme, onSelect }: ThemeCardProps) {
   )
 }
 
-export function ThemePreview({ layout, scale = 1 }: { layout: string, scale?: number }) {
+export function ThemePreview({ layout, scale = 1, backgroundImage }: { layout: string, scale?: number, backgroundImage?: string }) {
   const Card = () => (
     <div 
       className="w-16 p-2 rounded flex flex-col gap-1.5 shadow-sm bg-[var(--preview-bg)] border border-[var(--preview-border)] origin-center"
@@ -98,8 +98,14 @@ export function ThemePreview({ layout, scale = 1 }: { layout: string, scale?: nu
 
   const SidePanel = () => (
     <div className="h-full w-full bg-[var(--preview-muted)] relative overflow-hidden flex items-center justify-center">
+      {backgroundImage && (
+        <div 
+          className="absolute inset-0 bg-cover bg-center opacity-50"
+          style={{ backgroundImage: `url(${backgroundImage})` }}
+        />
+      )}
       <div 
-        className="w-6 h-6 rounded-full bg-[var(--preview-primary)] opacity-20 origin-center" 
+        className="w-6 h-6 rounded-full bg-[var(--preview-primary)] opacity-20 origin-center relative z-10" 
         style={{ transform: `scale(${scale})` }}
       />
     </div>
@@ -108,7 +114,9 @@ export function ThemePreview({ layout, scale = 1 }: { layout: string, scale?: nu
   if (layout === "Split-Left") {
     return (
       <div className="w-full h-full grid grid-cols-2">
-        <SidePanel />
+        <div className="relative h-full w-full">
+            <SidePanel />
+        </div>
         <div className="relative flex items-center justify-center bg-[var(--preview-bg)]">
           <Card />
         </div>
@@ -122,7 +130,9 @@ export function ThemePreview({ layout, scale = 1 }: { layout: string, scale?: nu
         <div className="relative flex items-center justify-center bg-[var(--preview-bg)]">
           <Card />
         </div>
-        <SidePanel />
+        <div className="relative h-full w-full">
+            <SidePanel />
+        </div>
       </div>
     )
   }
@@ -131,7 +141,14 @@ export function ThemePreview({ layout, scale = 1 }: { layout: string, scale?: nu
     return (
       <div className="w-full h-full relative flex items-center justify-center">
         <div className="absolute inset-0 bg-[var(--preview-muted)]" />
-        <div className="absolute inset-0 bg-[var(--preview-primary)] opacity-10" />
+        {backgroundImage ? (
+             <div 
+             className="absolute inset-0 bg-cover bg-center opacity-80"
+             style={{ backgroundImage: `url(${backgroundImage})` }}
+           />
+        ) : (
+            <div className="absolute inset-0 bg-[var(--preview-primary)] opacity-10" />
+        )}
         <div className="relative z-10">
           <Card />
         </div>
@@ -142,7 +159,14 @@ export function ThemePreview({ layout, scale = 1 }: { layout: string, scale?: nu
   // Centered (Default)
   return (
     <div className="w-full h-full relative flex items-center justify-center bg-[var(--preview-bg)]">
-      <div className="absolute inset-0 opacity-5 bg-[var(--preview-fg)] pattern-grid-lg" />
+      {backgroundImage ? (
+         <div 
+         className="absolute inset-0 bg-cover bg-center opacity-20"
+         style={{ backgroundImage: `url(${backgroundImage})` }}
+       />
+      ) : (
+        <div className="absolute inset-0 opacity-5 bg-[var(--preview-fg)] pattern-grid-lg" />
+      )}
       <Card />
     </div>
   )

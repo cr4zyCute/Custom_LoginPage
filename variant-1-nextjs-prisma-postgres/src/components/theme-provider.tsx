@@ -24,6 +24,46 @@ export function ThemeProvider({ children, initialTheme }: ThemeProviderProps) {
     setTheme(initialTheme || null)
   }, [initialTheme])
 
+  // Poll for theme updates to enable real-time changes
+  React.useEffect(() => {
+    // Skip polling in admin panel
+    if (pathname?.startsWith('/admin')) return
+
+    const fetchActiveTheme = async () => {
+      try {
+        const res = await fetch('/api/active-theme')
+        if (!res.ok) return
+        
+        const activeTheme = await res.json()
+        
+        setTheme((currentTheme) => {
+          if (!currentTheme) return activeTheme
+          
+          // Check if ID changed
+          if (currentTheme.id !== activeTheme.id) return activeTheme
+          
+          // Check if updated timestamp changed
+          const currentUpdated = new Date(currentTheme.updatedAt).getTime()
+          const activeUpdated = new Date(activeTheme.updatedAt).getTime()
+          
+          if (currentUpdated !== activeUpdated) return activeTheme
+          
+          return currentTheme
+        })
+      } catch (error) {
+        console.error('Failed to poll active theme:', error)
+      }
+    }
+
+    // Initial fetch
+    fetchActiveTheme()
+
+    // Poll every 2 seconds
+    const intervalId = setInterval(fetchActiveTheme, 2000)
+    
+    return () => clearInterval(intervalId)
+  }, [pathname])
+
   React.useEffect(() => {
     const root = document.documentElement
 
