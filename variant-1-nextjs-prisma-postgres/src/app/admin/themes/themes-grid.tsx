@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Theme } from "@prisma/client"
 import { ThemeConfig } from "@/types/theme"
 import { ThemeCard, ThemePreview } from "./theme-card"
@@ -19,6 +19,16 @@ interface ThemesGridProps {
 
 export function ThemesGrid({ themes, activateAction }: ThemesGridProps) {
   const [selectedTheme, setSelectedTheme] = useState<Theme | null>(null)
+
+  // Sync selectedTheme when themes prop updates (e.g. after background upload)
+  useEffect(() => {
+    if (selectedTheme) {
+      const updatedTheme = themes.find(t => t.id === selectedTheme.id)
+      if (updatedTheme) {
+        setSelectedTheme(updatedTheme)
+      }
+    }
+  }, [themes])
 
   const container: Variants = {
     hidden: { opacity: 0 },
@@ -64,7 +74,7 @@ export function ThemesGrid({ themes, activateAction }: ThemesGridProps) {
       <AnimatePresence>
         {selectedTheme && (
           <ThemeDetailsModal 
-            key="theme-details-modal"
+            key={selectedTheme.id}
             theme={selectedTheme} 
             onClose={() => setSelectedTheme(null)} 
             activateAction={activateAction}
@@ -200,7 +210,7 @@ function ThemeDetailsModal({ theme, onClose, activateAction }: { theme: Theme, o
                   transition={{ duration: 0.2 }}
                   className="w-full h-full"
                 >
-                  <ThemePreview layout={theme.layout} scale={3} backgroundImage={assets?.backgroundImage} />
+                  <ThemePreview layout={theme.layout} scale={3} backgroundImage={assets?.backgroundImage} sidebarImage={assets?.sidebarImage} />
                 </motion.div>
               )}
               

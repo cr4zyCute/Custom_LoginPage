@@ -4,6 +4,7 @@
 import * as React from "react"
 import { useTheme } from "@/components/theme-provider"
 import { cn } from "@/lib/utils"
+import { ThemeConfig } from "@/types/theme"
 
 interface AuthLayoutProps {
   children: React.ReactNode
@@ -16,8 +17,21 @@ export function AuthLayout({ children, title, description }: AuthLayoutProps) {
   const { theme } = useTheme()
   const layout = theme?.layout || "Centered" 
   
+  // Parse theme config
+  let config: ThemeConfig | null = null
+  if (theme?.config) {
+    try {
+      config = typeof theme.config === 'string' ? JSON.parse(theme.config) : theme.config
+    } catch (e) {
+      console.error("Failed to parse theme config", e)
+    }
+  }
+
   // Plantie Theme Detection
   const isPlantie = theme?.name === "Healthcare Green"
+  
+  // Custom Background Image
+  const backgroundImage = config?.assets?.backgroundImage
 
   // Common Form Container
   const FormContainer = (
@@ -99,12 +113,12 @@ export function AuthLayout({ children, title, description }: AuthLayoutProps) {
     return (
       <div className="relative h-screen flex items-center justify-center bg-muted overflow-hidden">
          {/* Background Image Layer */}
-         {isPlantie ? (
+         {isPlantie || backgroundImage ? (
              <>
                 <div 
                   className="absolute inset-0 bg-cover bg-center z-0 scale-105"
                   style={{ 
-                      backgroundImage: 'url("https://images.unsplash.com/photo-1603909223429-69bb7101f420?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80")',
+                      backgroundImage: backgroundImage ? `url("${backgroundImage}")` : 'url("https://images.unsplash.com/photo-1603909223429-69bb7101f420?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80")',
                       filter: 'brightness(0.25) contrast(1.1)'
                   }}
                 />

@@ -76,19 +76,28 @@ export function ThemeCard({ theme, onSelect }: ThemeCardProps) {
   )
 }
 
-export function ThemePreview({ layout, scale = 1, backgroundImage }: { layout: string, scale?: number, backgroundImage?: string }) {
+export function ThemePreview({ layout, scale = 1, backgroundImage, sidebarImage }: { layout: string, scale?: number, backgroundImage?: string, sidebarImage?: string }) {
   const Card = () => (
     <div 
-      className="w-16 p-2 rounded flex flex-col gap-1.5 shadow-sm bg-[var(--preview-bg)] border border-[var(--preview-border)] origin-center"
+      className={`w-16 p-2 rounded flex flex-col gap-1.5 shadow-sm bg-[var(--preview-bg)] border border-[var(--preview-border)] origin-center relative overflow-hidden`}
       style={{ 
         borderRadius: "calc(var(--preview-radius) * 0.5)",
         transform: `scale(${scale})` 
       }}
     >
-      <div className="h-1.5 w-8 bg-[var(--preview-fg)] opacity-80 rounded-sm mb-1" />
-      <div className="h-1.5 w-full border border-[var(--preview-border)] rounded-sm" />
-      <div className="h-1.5 w-full border border-[var(--preview-border)] rounded-sm" />
-      <div className="h-1.5 w-full bg-[var(--preview-primary)] rounded-sm mt-0.5" />
+      {/* If sidebar image exists and we are in full-bg mode (simulating the split card inside), show it */}
+      {sidebarImage && layout === "Full-Bg" && (
+        <div className="absolute left-0 top-0 bottom-0 w-6 bg-cover bg-center z-0" style={{ backgroundImage: `url(${sidebarImage})` }}>
+           <div className="absolute inset-0 bg-black/20" />
+        </div>
+      )}
+      
+      <div className={`relative z-10 flex flex-col gap-1.5 ${sidebarImage && layout === "Full-Bg" ? "pl-5" : ""}`}>
+        <div className="h-1.5 w-8 bg-[var(--preview-fg)] opacity-80 rounded-sm mb-1" />
+        <div className="h-1.5 w-full border border-[var(--preview-border)] rounded-sm" />
+        <div className="h-1.5 w-full border border-[var(--preview-border)] rounded-sm" />
+        <div className="h-1.5 w-full bg-[var(--preview-primary)] rounded-sm mt-0.5" />
+      </div>
     </div>
   )
 
@@ -104,6 +113,14 @@ export function ThemePreview({ layout, scale = 1, backgroundImage }: { layout: s
           style={{ backgroundImage: `url(${backgroundImage})` }}
         />
       )}
+      {/* If it's a split layout and we have a sidebar image, use that instead of the background image */}
+      {sidebarImage && (
+        <div 
+          className="absolute inset-0 bg-cover bg-center opacity-80"
+          style={{ backgroundImage: `url(${sidebarImage})` }}
+        />
+      )}
+      
       <div 
         className="w-6 h-6 rounded-full bg-[var(--preview-primary)] opacity-20 origin-center relative z-10" 
         style={{ transform: `scale(${scale})` }}
@@ -142,12 +159,12 @@ export function ThemePreview({ layout, scale = 1, backgroundImage }: { layout: s
       <div className="w-full h-full relative flex items-center justify-center">
         <div className="absolute inset-0 bg-[var(--preview-muted)]" />
         {backgroundImage ? (
-             <div 
-             className="absolute inset-0 bg-cover bg-center opacity-80"
-             style={{ backgroundImage: `url(${backgroundImage})` }}
-           />
+          <div 
+            className="absolute inset-0 bg-cover bg-center opacity-80"
+            style={{ backgroundImage: `url(${backgroundImage})` }}
+          />
         ) : (
-            <div className="absolute inset-0 bg-[var(--preview-primary)] opacity-10" />
+          <div className="absolute inset-0 bg-[var(--preview-primary)] opacity-10" />
         )}
         <div className="relative z-10">
           <Card />
@@ -161,11 +178,11 @@ export function ThemePreview({ layout, scale = 1, backgroundImage }: { layout: s
     <div className="w-full h-full relative flex items-center justify-center bg-[var(--preview-bg)]">
       {backgroundImage ? (
          <div 
-         className="absolute inset-0 bg-cover bg-center opacity-20"
+         className="absolute inset-0 bg-cover bg-center opacity-40"
          style={{ backgroundImage: `url(${backgroundImage})` }}
        />
       ) : (
-        <div className="absolute inset-0 opacity-5 bg-[var(--preview-fg)] pattern-grid-lg" />
+        <div className="absolute inset-0 opacity-5 bg-[var(--preview-fg)]" />
       )}
       <Card />
     </div>

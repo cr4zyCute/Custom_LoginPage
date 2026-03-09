@@ -43,6 +43,7 @@ export interface ThemeConfig {
   assets?: {
     logo?: string;
     backgroundImage?: string;
+    sidebarImage?: string;
     overlayOpacity?: number; // 0 to 1
   };
   animations?: {

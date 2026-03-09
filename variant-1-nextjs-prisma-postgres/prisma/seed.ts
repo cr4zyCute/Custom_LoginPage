@@ -144,6 +144,10 @@ const healthcareGreenConfig = createConfig(baseConfig, {
       variant: "filled",
       radius: "1rem"
     }
+  },
+  assets: {
+    backgroundImage: "https://images.unsplash.com/photo-1603909223429-69bb7101f420?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+    sidebarImage: "https://images.unsplash.com/photo-1615486363973-9a7877b3f2ae?auto=format&fit=crop&w=900&q=80"
   }
 })
 
