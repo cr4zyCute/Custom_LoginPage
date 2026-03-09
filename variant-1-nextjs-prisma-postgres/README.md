@@ -1,6 +1,6 @@
-# Variant 1: Next.js + Prisma + PostgreSQL (White Label Auth)
+# White Label Authentication System (Next.js + Prisma + PostgreSQL)
 
-This is the primary implementation of the White Label Authentication System, built with a robust and modern stack.
+This is a premium, marketplace-ready authentication system built with a robust and modern stack. It features 50+ pre-configured themes, a dynamic email template system, and a comprehensive admin dashboard.
 
 ## 🚀 Tech Stack
 
@@ -15,17 +15,19 @@ This is the primary implementation of the White Label Authentication System, bui
 
 ## ✨ Key Features
 
-- **Multi-Theme System:** 26+ Pre-configured themes (Modern, Retro, Minimalist, Corporate, Creative).
+- **Multi-Theme System:** 50+ Pre-configured themes (Modern, Retro, Minimalist, Corporate, Creative).
 - **Dynamic Theming:** Theme configuration stored in database and applied at runtime.
+- **Admin Dashboard:**
+  - **Theme Manager:** Visual grid to preview and activate themes instantly.
+  - **Email Templates:** Edit transactional emails (Verification, Password Reset) directly from the UI.
 - **Authentication:**
-  - Email/Password Login & Registration.
-  - Google OAuth (configured).
-  - Secure Password Hashing (bcryptjs).
+  - **Email/Password:** Secure login & registration with bcrypt hashing.
+  - **Social Login:** Google OAuth (configurable).
+  - **Passwordless/OTP:** Magic link authentication supported.
+  - **Forgot Password:** Complete flow with token-based reset.
 - **User Interface:**
-  - Responsive Login & Register Pages.
-  - Modal Routes (`/modal/login`, `/modal/register`).
-  - Shake animations and visual feedback for errors.
-- **White Label Ready:** Easy to customize branding and themes.
+  - Responsive layouts (Centered, Split-Left, Split-Right, Full-Background).
+  - Smooth animations and visual feedback.
 
 ## 🛠️ Getting Started
 
@@ -46,7 +48,7 @@ npx prisma generate
 # Push Schema to Database (creates dev.db)
 npx prisma db push
 
-# Seed Database with 26 Themes
+# Seed Database with Themes & Email Templates
 npx prisma db seed
 ```
 
@@ -58,8 +60,17 @@ Create a `.env` file in the root:
 DATABASE_URL="file:./dev.db"
 NEXTAUTH_SECRET="your-super-secret-key"
 NEXTAUTH_URL="http://localhost:3000"
+
+# Google OAuth (Optional)
 GOOGLE_CLIENT_ID=""
 GOOGLE_CLIENT_SECRET=""
+
+# Email Server (SMTP) - Required for Magic Links & Forgot Password
+EMAIL_SERVER_HOST="smtp.example.com"
+EMAIL_SERVER_PORT="587"
+EMAIL_SERVER_USER="apikey"
+EMAIL_SERVER_PASSWORD="your-api-key"
+EMAIL_FROM="noreply@example.com"
 ```
 
 ### 4. Run Development Server
@@ -73,19 +84,32 @@ Visit [http://localhost:3000](http://localhost:3000).
 ## 📂 Project Structure
 
 - `src/app`: App Router pages and API routes.
-- `src/components/auth`: Login and Register forms.
-- `src/components/ui`: Reusable UI components.
-- `src/lib`: Utilities and configuration (Prisma, Auth).
-- `src/types`: TypeScript definitions (Theme config).
+  - `admin/`: Dashboard for Themes and Emails.
+  - `(auth)/`: Login, Register, Forgot Password pages.
+  - `api/auth`: NextAuth and custom API routes.
+- `src/actions`: Server Actions for Admin mutations.
+- `src/components`: Reusable UI components.
+- `src/lib`: Utilities (Prisma, Auth, Email).
 - `prisma`: Database schema and seed script.
 
-## 🎨 Theme Configuration
+## 🎨 Customization
 
-Themes are stored in the `Theme` table in the database. Each theme contains a JSON `config` object defining colors, typography, and component styles.
+### Switching Themes
+Go to `/admin/themes` to browse and activate themes. The changes apply globally in real-time.
 
-To change the active theme, update the `isActive` flag in the database:
+### Editing Email Templates
+Go to `/admin/emails` to modify the HTML content and subject lines for system emails.
 
-```sql
-UPDATE Theme SET isActive = 0;
-UPDATE Theme SET isActive = 1 WHERE name = 'Retro';
-```
+### Adding a New Theme
+1. Open `prisma/seed.ts`.
+2. Add a new config object using `createConfig`.
+3. Add it to the seeding loop.
+4. Run `npx prisma db seed`.
+
+## 📦 Deployment
+
+1. **Database:** Switch `datasource` provider in `schema.prisma` to `postgresql`.
+2. **Build:** Run `npm run build`.
+3. **Start:** Run `npm start`.
+
+Ensure all environment variables are set in your production environment (Vercel, Railway, etc.).

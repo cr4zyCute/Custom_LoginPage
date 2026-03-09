@@ -99,9 +99,14 @@ export function LoginForm() {
             )}
           </div>
           <div className="grid gap-2">
-            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" htmlFor="password">
-              Password
-            </label>
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" htmlFor="password">
+                Password
+              </label>
+              <a href="/forgot-password" className="text-xs text-muted-foreground hover:text-primary">
+                Forgot password?
+              </a>
+            </div>
             <motion.input
               id="password"
               placeholder="••••••••"

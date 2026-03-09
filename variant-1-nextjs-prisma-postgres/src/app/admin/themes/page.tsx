@@ -1,28 +1,7 @@
 
 import { prisma } from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
 import { ThemesGrid } from "./themes-grid";
-
-async function activateTheme(formData: FormData) {
-  "use server";
-  const themeId = formData.get("themeId") as string;
-  if (!themeId) return;
-
-  // Deactivate all themes
-  await prisma.theme.updateMany({
-    data: { isActive: false },
-  });
-
-  // Activate selected theme
-  await prisma.theme.update({
-    where: { id: themeId },
-    data: { isActive: true },
-  });
-
-  revalidatePath("/admin/themes");
-  revalidatePath("/"); // Update home page
-  revalidatePath("/login"); // Update login page
-}
+import { activateTheme } from "@/actions/theme-actions";
 
 export default async function AdminThemesPage() {
   const themes = await prisma.theme.findMany({

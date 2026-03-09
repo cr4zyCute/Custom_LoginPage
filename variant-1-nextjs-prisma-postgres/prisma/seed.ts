@@ -332,6 +332,49 @@ async function main() {
     })
   }
 
+  // --- Seed Email Templates ---
+  console.log('Seeding email templates...')
+  
+  await prisma.emailTemplate.upsert({
+    where: { name: 'verification_email' },
+    update: {},
+    create: {
+      name: 'verification_email',
+      subject: 'Sign in to {{host}}',
+      htmlContent: `
+        <body style="background: #f9f9f9; padding: 20px; font-family: sans-serif;">
+          <div style="max-width: 600px; margin: 0 auto; background: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <h1 style="color: #333; margin-bottom: 20px;">Sign in to {{host}}</h1>
+            <p style="color: #666; margin-bottom: 30px;">Click the button below to sign in. This link will expire in 24 hours.</p>
+            <a href="{{url}}" style="display: inline-block; background: #000; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">Sign in</a>
+            <p style="color: #999; font-size: 12px; margin-top: 40px;">If you didn't request this email, you can safely ignore it.</p>
+          </div>
+        </body>
+      `,
+      textContent: `Sign in to {{host}}\n{{url}}\n\n`
+    }
+  })
+
+  await prisma.emailTemplate.upsert({
+    where: { name: 'reset_password' },
+    update: {},
+    create: {
+      name: 'reset_password',
+      subject: 'Reset your password for {{host}}',
+      htmlContent: `
+        <body style="background: #f9f9f9; padding: 20px; font-family: sans-serif;">
+          <div style="max-width: 600px; margin: 0 auto; background: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <h1 style="color: #333; margin-bottom: 20px;">Reset Password</h1>
+            <p style="color: #666; margin-bottom: 30px;">You requested to reset your password. Click the link below to proceed.</p>
+            <a href="{{url}}" style="display: inline-block; background: #000; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">Reset Password</a>
+            <p style="color: #999; font-size: 12px; margin-top: 40px;">If you didn't request this, please ignore this email.</p>
+          </div>
+        </body>
+      `,
+      textContent: `Reset your password: {{url}}\n\n`
+    }
+  })
+
   console.log('Seeding completed.')
 }
 

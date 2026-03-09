@@ -76,11 +76,14 @@ export function ThemeCard({ theme, onSelect }: ThemeCardProps) {
   )
 }
 
-export function ThemePreview({ layout }: { layout: string }) {
+export function ThemePreview({ layout, scale = 1 }: { layout: string, scale?: number }) {
   const Card = () => (
     <div 
-      className="w-16 p-2 rounded flex flex-col gap-1.5 shadow-sm bg-[var(--preview-bg)] border border-[var(--preview-border)]"
-      style={{ borderRadius: "calc(var(--preview-radius) * 0.5)" }}
+      className="w-16 p-2 rounded flex flex-col gap-1.5 shadow-sm bg-[var(--preview-bg)] border border-[var(--preview-border)] origin-center"
+      style={{ 
+        borderRadius: "calc(var(--preview-radius) * 0.5)",
+        transform: `scale(${scale})` 
+      }}
     >
       <div className="h-1.5 w-8 bg-[var(--preview-fg)] opacity-80 rounded-sm mb-1" />
       <div className="h-1.5 w-full border border-[var(--preview-border)] rounded-sm" />
@@ -95,7 +98,10 @@ export function ThemePreview({ layout }: { layout: string }) {
 
   const SidePanel = () => (
     <div className="h-full w-full bg-[var(--preview-muted)] relative overflow-hidden flex items-center justify-center">
-      <div className="w-6 h-6 rounded-full bg-[var(--preview-primary)] opacity-20" />
+      <div 
+        className="w-6 h-6 rounded-full bg-[var(--preview-primary)] opacity-20 origin-center" 
+        style={{ transform: `scale(${scale})` }}
+      />
     </div>
   )
 

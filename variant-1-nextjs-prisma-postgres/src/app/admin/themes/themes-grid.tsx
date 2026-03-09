@@ -4,10 +4,10 @@ import { useState } from "react"
 import { Theme } from "@prisma/client"
 import { ThemeConfig } from "@/types/theme"
 import { ThemeCard, ThemePreview } from "./theme-card"
-import { ModalLayout } from "@/components/ui/modal-layout"
 import { Button } from "@/components/ui/button"
 import { X } from "lucide-react"
 import { useFormStatus } from "react-dom"
+import { motion, AnimatePresence, Variants } from "framer-motion"
 
 interface ThemesGridProps {
   themes: Theme[]
@@ -17,25 +17,57 @@ interface ThemesGridProps {
 export function ThemesGrid({ themes, activateAction }: ThemesGridProps) {
   const [selectedTheme, setSelectedTheme] = useState<Theme | null>(null)
 
+  const container: Variants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.05
+      }
+    }
+  }
+
+  const item: Variants = {
+    hidden: { opacity: 0, y: 20 },
+    show: { 
+      opacity: 1, 
+      y: 0,
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 24
+      }
+    }
+  }
+
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <motion.div 
+        variants={container}
+        initial="hidden"
+        animate="show"
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+      >
         {themes.map((theme) => (
-          <ThemeCard 
-            key={theme.id} 
-            theme={theme} 
-            onSelect={setSelectedTheme}
-          />
+          <motion.div key={theme.id} variants={item}>
+            <ThemeCard 
+              theme={theme} 
+              onSelect={setSelectedTheme}
+            />
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
 
-      {selectedTheme && (
-        <ThemeDetailsModal 
-          theme={selectedTheme} 
-          onClose={() => setSelectedTheme(null)} 
-          activateAction={activateAction}
-        />
-      )}
+      <AnimatePresence>
+        {selectedTheme && (
+          <ThemeDetailsModal 
+            key="theme-details-modal"
+            theme={selectedTheme} 
+            onClose={() => setSelectedTheme(null)} 
+            activateAction={activateAction}
+          />
+        )}
+      </AnimatePresence>
     </>
   )
 }
@@ -62,24 +94,49 @@ function ThemeDetailsModal({ theme, onClose, activateAction }: { theme: Theme, o
   } as React.CSSProperties
 
   return (
-    <ModalLayout className="max-w-5xl w-full p-0 overflow-hidden bg-background border-none shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+        className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+      />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+        transition={{ type: "spring", duration: 0.5, bounce: 0.3 }}
+        className="relative w-full max-w-5xl overflow-hidden shadow-2xl rounded-lg z-10"
+        style={{
+          ...style,
+          backgroundColor: "var(--preview-bg)",
+          color: "var(--preview-fg)",
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
       <div className="relative grid grid-cols-1 lg:grid-cols-5 h-[80vh] max-h-[700px]">
         <button 
           onClick={onClose}
-          className="absolute right-4 top-4 z-50 p-2 rounded-full bg-background/80 hover:bg-background text-foreground transition-colors shadow-sm border"
+          className="absolute right-4 top-4 z-50 p-2 rounded-full hover:opacity-80 transition-opacity shadow-sm border"
+          style={{
+            backgroundColor: "var(--preview-bg)",
+            color: "var(--preview-fg)",
+            borderColor: "var(--preview-border)"
+          }}
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Left Side - Preview */}
-        <div className="lg:col-span-3 relative bg-muted/30 p-8 flex items-center justify-center border-r" style={style}>
-          <div className="w-full aspect-video shadow-2xl rounded-lg overflow-hidden border bg-background">
-            <ThemePreview layout={theme.layout} />
+        <div className="lg:col-span-3 relative p-8 flex items-center justify-center border-r" style={{ borderColor: "var(--preview-border)" }}>
+          <div className="w-full aspect-video shadow-2xl rounded-lg overflow-hidden border" style={{ borderColor: "var(--preview-border)", backgroundColor: "var(--preview-bg)" }}>
+            <ThemePreview layout={theme.layout} scale={3} />
           </div>
         </div>
 
         {/* Right Side - Details */}
-        <div className="lg:col-span-2 p-6 flex flex-col h-full overflow-y-auto bg-card">
+        <div className="lg:col-span-2 p-6 flex flex-col h-full overflow-y-auto">
           <div className="mb-6">
             <div className="flex justify-between items-start mb-2">
               <h2 className="text-2xl font-bold">{theme.name}</h2>
@@ -128,7 +185,7 @@ function ThemeDetailsModal({ theme, onClose, activateAction }: { theme: Theme, o
             </div>
           </div>
 
-          <div className="mt-auto pt-4 border-t">
+          <div className="mt-auto pt-4 border-t" style={{ borderColor: "var(--preview-border)" }}>
             <form action={async (formData) => {
                 await activateAction(formData);
                 onClose();
@@ -139,7 +196,8 @@ function ThemeDetailsModal({ theme, onClose, activateAction }: { theme: Theme, o
           </div>
         </div>
       </div>
-    </ModalLayout>
+      </motion.div>
+    </div>
   )
 }
 

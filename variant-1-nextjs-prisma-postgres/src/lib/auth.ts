@@ -6,6 +6,7 @@ import CredentialsProvider from "next-auth/providers/credentials"
 import GoogleProvider from "next-auth/providers/google"
 import EmailProvider from "next-auth/providers/email"
 import bcrypt from "bcryptjs"
+import { createTransport } from "nodemailer"
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma) as any,
@@ -33,7 +34,39 @@ export const authOptions: NextAuthOptions = {
         }
       },
       from: process.env.EMAIL_FROM,
-      // TODO: Add custom sendVerificationRequest for templated emails
+      async sendVerificationRequest(params) {
+        const { identifier: email, url, provider } = params;
+        const { host } = new URL(url);
+        
+        // Fetch template from DB
+        const template = await prisma.emailTemplate.findUnique({
+          where: { name: "verification_email" }
+        });
+
+        // Fallback or use template
+        const subject = template?.subject || `Sign in to ${host}`;
+        const html = template?.htmlContent?.replace(/{{url}}/g, url) || `
+          <body>
+            <p>Sign in to <b>${host}</b></p>
+            <p><a href="${url}">Sign in</a></p>
+          </body>
+        `;
+        const text = template?.textContent?.replace(/{{url}}/g, url) || `Sign in to ${host}\n${url}\n\n`;
+
+        const transport = createTransport(provider.server);
+        const result = await transport.sendMail({
+          to: email,
+          from: provider.from,
+          subject,
+          text,
+          html,
+        });
+        
+        const failed = result.rejected.concat(result.pending).filter(Boolean);
+        if (failed.length) {
+          throw new Error(`Email(s) (${failed.join(", ")}) could not be sent`);
+        }
+      },
     }),
     CredentialsProvider({
       name: "Credentials",
