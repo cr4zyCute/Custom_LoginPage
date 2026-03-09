@@ -44,7 +44,6 @@ export interface ThemeConfig {
     logo?: string;
     backgroundImage?: string;
     overlayOpacity?: number; // 0 to 1
-    previewImage?: string; // URL for the theme preview image
   };
   animations?: {
     initial: any;

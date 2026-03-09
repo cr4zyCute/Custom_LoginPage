@@ -21,7 +21,7 @@ export function ThemeCard({ theme, onSelect }: ThemeCardProps) {
 
   if (!config) return <div className="p-4 border border-red-500">Invalid Config</div>
 
-  const { colors, assets } = config
+  const { colors } = config
 
   // Helper to get color style
   const style = {
@@ -45,7 +45,7 @@ export function ThemeCard({ theme, onSelect }: ThemeCardProps) {
         className="aspect-video w-full relative border-b overflow-hidden"
         style={style}
       >
-        <ThemePreview layout={theme.layout} previewImage={assets?.previewImage} />
+        <ThemePreview layout={theme.layout} />
       </div>
 
       {/* Info & Action */}
@@ -76,19 +76,7 @@ export function ThemeCard({ theme, onSelect }: ThemeCardProps) {
   )
 }
 
-export function ThemePreview({ layout, scale = 1, previewImage }: { layout: string, scale?: number, previewImage?: string }) {
-  if (previewImage) {
-    return (
-      <div className="w-full h-full relative bg-[var(--preview-bg)]">
-        <img 
-          src={previewImage} 
-          alt="Theme Preview" 
-          className="w-full h-full object-cover"
-        />
-      </div>
-    )
-  }
-
+export function ThemePreview({ layout, scale = 1 }: { layout: string, scale?: number }) {
   const Card = () => (
     <div 
       className="w-16 p-2 rounded flex flex-col gap-1.5 shadow-sm bg-[var(--preview-bg)] border border-[var(--preview-border)] origin-center"
