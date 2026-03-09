@@ -14,6 +14,17 @@ const createConfig = (base: any, overrides: any) => {
   }
 }
 
+// Helper to add preview image
+const addPreviewImage = (config: any, name: string) => {
+  return {
+    ...config,
+    assets: {
+      ...config.assets,
+      previewImage: `https://placehold.co/1280x720/png?text=${encodeURIComponent(name)}`
+    }
+  }
+}
+
 const baseConfig = {
   colors: {
     primary: "hsl(222.2 47.4% 11.2%)",
@@ -161,7 +172,7 @@ async function main() {
       where: { name },
       update: { 
         category: 'Professional',
-        config: JSON.stringify(professionalConfig) 
+        config: JSON.stringify(addPreviewImage(professionalConfig, name)) 
       },
       create: {
         name,
@@ -169,7 +180,7 @@ async function main() {
         layout: 'Centered',
         isPremium: false,
         isActive: name === 'Default', // Default is active
-        config: JSON.stringify(professionalConfig)
+        config: JSON.stringify(addPreviewImage(professionalConfig, name))
       }
     })
   }
@@ -181,14 +192,14 @@ async function main() {
       where: { name },
       update: { 
         category: 'Minimal',
-        config: JSON.stringify(minimalistConfig)
+        config: JSON.stringify(addPreviewImage(minimalistConfig, name))
        },
       create: {
         name,
         category: 'Minimal',
         layout: 'Centered',
         isPremium: false,
-        config: JSON.stringify(minimalistConfig)
+        config: JSON.stringify(addPreviewImage(minimalistConfig, name))
       }
     })
   }
@@ -200,14 +211,14 @@ async function main() {
       where: { name },
       update: { 
         category: 'Creative',
-        config: JSON.stringify(creativeConfig)
+        config: JSON.stringify(addPreviewImage(creativeConfig, name))
       },
       create: {
         name,
         category: 'Creative',
         layout: 'Split-Left',
         isPremium: false,
-        config: JSON.stringify(creativeConfig)
+        config: JSON.stringify(addPreviewImage(creativeConfig, name))
       }
     })
   }
@@ -219,14 +230,14 @@ async function main() {
       where: { name },
       update: { 
         category: 'Premium',
-        config: JSON.stringify(premiumConfig)
+        config: JSON.stringify(addPreviewImage(premiumConfig, name))
       },
       create: {
         name,
         category: 'Premium',
         layout: 'Split-Left',
         isPremium: true,
-        config: JSON.stringify(premiumConfig)
+        config: JSON.stringify(addPreviewImage(premiumConfig, name))
       }
     })
   }
@@ -238,14 +249,14 @@ async function main() {
       where: { name },
       update: { 
         category: 'Modern Collection',
-        config: JSON.stringify(modernConfig)
+        config: JSON.stringify(addPreviewImage(modernConfig, name))
       },
       create: {
         name,
         category: 'Modern Collection',
         layout: 'Split-Left',
         isPremium: false,
-        config: JSON.stringify(modernConfig)
+        config: JSON.stringify(addPreviewImage(modernConfig, name))
       }
     })
   }
@@ -257,14 +268,14 @@ async function main() {
       where: { name },
       update: { 
         category: 'Retro Collection',
-        config: JSON.stringify(retroConfig)
+        config: JSON.stringify(addPreviewImage(retroConfig, name))
       },
       create: {
         name,
         category: 'Retro Collection',
         layout: 'Split-Right',
         isPremium: false,
-        config: JSON.stringify(retroConfig)
+        config: JSON.stringify(addPreviewImage(retroConfig, name))
       }
     })
   }
@@ -276,14 +287,14 @@ async function main() {
       where: { name },
       update: { 
         category: 'Minimalist Collection',
-        config: JSON.stringify(minimalistConfig)
+        config: JSON.stringify(addPreviewImage(minimalistConfig, name))
       },
       create: {
         name,
         category: 'Minimalist Collection',
         layout: 'Centered',
         isPremium: false,
-        config: JSON.stringify(minimalistConfig)
+        config: JSON.stringify(addPreviewImage(minimalistConfig, name))
       }
     })
   }
@@ -301,14 +312,14 @@ async function main() {
       where: { name },
       update: { 
         category: 'Corporate Collection',
-        config: JSON.stringify(config)
+        config: JSON.stringify(addPreviewImage(config, name))
       },
       create: {
         name,
         category: 'Corporate Collection',
         layout: 'Full-Bg',
         isPremium: false,
-        config: JSON.stringify(config)
+        config: JSON.stringify(addPreviewImage(config, name))
       }
     })
   }
@@ -320,14 +331,14 @@ async function main() {
       where: { name },
       update: { 
         category: 'Creative Collection',
-        config: JSON.stringify(creativeConfig)
+        config: JSON.stringify(addPreviewImage(creativeConfig, name))
       },
       create: {
         name,
         category: 'Creative Collection',
         layout: 'Split-Left',
         isPremium: true,
-        config: JSON.stringify(creativeConfig)
+        config: JSON.stringify(addPreviewImage(creativeConfig, name))
       }
     })
   }

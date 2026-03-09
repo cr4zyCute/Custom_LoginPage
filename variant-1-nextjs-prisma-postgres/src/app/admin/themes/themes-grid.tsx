@@ -82,7 +82,7 @@ function ThemeDetailsModal({ theme, onClose, activateAction }: { theme: Theme, o
 
   if (!config) return null
 
-  const { colors } = config
+  const { colors, assets } = config
 
   const style = {
     "--preview-bg": colors.background,
@@ -131,7 +131,7 @@ function ThemeDetailsModal({ theme, onClose, activateAction }: { theme: Theme, o
         {/* Left Side - Preview */}
         <div className="lg:col-span-3 relative p-8 flex items-center justify-center border-r" style={{ borderColor: "var(--preview-border)" }}>
           <div className="w-full aspect-video shadow-2xl rounded-lg overflow-hidden border" style={{ borderColor: "var(--preview-border)", backgroundColor: "var(--preview-bg)" }}>
-            <ThemePreview layout={theme.layout} scale={3} />
+            <ThemePreview layout={theme.layout} scale={3} previewImage={assets?.previewImage} />
           </div>
         </div>
 
