@@ -12,7 +12,7 @@ const SAMPLE_IMAGES = [
   "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=2070&q=80", // Dark Fern
   "https://images.unsplash.com/photo-1509423350716-97f9360b4e09?auto=format&fit=crop&w=2070&q=80", // Succulent/Aloe (Health)
   "https://images.unsplash.com/photo-1533038590840-1cde6e668a91?auto=format&fit=crop&w=2070&q=80", // Clean Green Leaf (Health)
-  "https://images.unsplash.com/photo-1596230529625-7ee541fbca74?auto=format&fit=crop&w=2070&q=80", // Monstera/Tropical Leaves (Health)
+  "https://images.unsplash.com/photo-1551970634-747846a548cb?auto=format&fit=crop&w=2070&q=80", // Green-leafed plant (Josefin)
   "https://images.unsplash.com/photo-1497250681960-ef046c08a56e?auto=format&fit=crop&w=2070&q=80"  // Monstera Plant
 ]
 import { useFormStatus } from "react-dom"
