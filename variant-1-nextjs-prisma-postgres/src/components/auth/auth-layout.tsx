@@ -27,7 +27,7 @@ export function AuthLayout({ children, title, description }: AuthLayoutProps) {
     }
   }
 
-  // Plantie Theme Detection
+  // Planti e Theme Detection
   const isPlantie = theme?.name === "Healthcare Green"
   
   // Custom Background Image

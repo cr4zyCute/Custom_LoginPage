@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { ThemesGrid } from "./themes-grid";
 import { activateTheme } from "@/actions/theme-actions";
 
+export const dynamic = 'force-dynamic';
+
 export default async function AdminThemesPage() {
   const themes = await prisma.theme.findMany({
     orderBy: { category: "asc" },

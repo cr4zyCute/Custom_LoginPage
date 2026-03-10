@@ -10,7 +10,8 @@ const createConfig = (base: any, overrides: any) => {
     ...base,
     colors: { ...base.colors, ...overrides.colors },
     typography: { ...base.typography, ...overrides.typography },
-    components: { ...base.components, ...overrides.components }
+    components: { ...base.components, ...overrides.components },
+    assets: { ...base.assets, ...overrides.assets }
   }
 }
 
@@ -35,6 +36,10 @@ const baseConfig = {
     button: { variant: "default", radius: "0.5rem", shadow: "none" },
     card: { radius: "0.5rem", shadow: "sm", border: true },
     input: { variant: "default", radius: "0.5rem" }
+  },
+  assets: {
+    backgroundImage: "https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=2070&q=80",
+    sidebarImage: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=2070&q=80"
   }
 }
 
