@@ -8,12 +8,12 @@ import { Button } from "@/components/ui/button"
 import { X, Image as ImageIcon, Upload, ImagePlus, Loader2, Plus } from "lucide-react"
 
 const SAMPLE_IMAGES = [
-  "https://images.unsplash.com/photo-1603909223429-69bb7101f420?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80", // Forest (Dark)
-  "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=2070&q=80", // Fern (Light)
-  "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=2070&q=80", // Abstract Green
-  "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=2070&q=80", // Mountains
-  "https://images.unsplash.com/photo-1550684847-75bdda21cc95?auto=format&fit=crop&w=2070&q=80", // Geometric
-  "https://images.unsplash.com/photo-1497250681960-ef046c08a56e?auto=format&fit=crop&w=2070&q=80"  // Plant
+  "https://images.unsplash.com/photo-1603909223429-69bb7101f420?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80", // Cannabis/Health Green
+  "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=2070&q=80", // Dark Fern
+  "https://images.unsplash.com/photo-1509423350716-97f9360b4e09?auto=format&fit=crop&w=2070&q=80", // Succulent/Aloe (Health)
+  "https://images.unsplash.com/photo-1533038590840-1cde6e668a91?auto=format&fit=crop&w=2070&q=80", // Clean Green Leaf (Health)
+  "https://images.unsplash.com/photo-1626015449437-4d6c0b396e95?auto=format&fit=crop&w=2070&q=80", // Fresh Mint/Herb (Health)
+  "https://images.unsplash.com/photo-1497250681960-ef046c08a56e?auto=format&fit=crop&w=2070&q=80"  // Monstera Plant
 ]
 import { useFormStatus } from "react-dom"
 import { motion, AnimatePresence, Variants } from "framer-motion"
@@ -218,96 +218,76 @@ function ThemeDetailsModal({ theme, onClose, activateAction }: { theme: Theme, o
 
           {/* Bottom: Background Selection */}
           <div className="h-[350px] bg-background/50 border-t flex flex-col backdrop-blur-sm" style={{ borderColor: "var(--preview-border)" }}>
-             <div className="flex items-center px-6 pt-4 gap-6 border-b" style={{ borderColor: "var(--preview-border)" }}>
-                <button 
-                  onClick={() => setActiveTab('gallery')}
-                  className={`pb-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'gallery' ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
-                >
-                  Gallery
-                </button>
-                <button 
-                  onClick={() => setActiveTab('custom')}
-                  className={`pb-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'custom' ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
-                >
-                  Custom Upload
-                </button>
-             </div>
-
-             <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
-                {activeTab === 'gallery' ? (
-                   <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory">
-                      {SAMPLE_IMAGES.map((url, idx) => (
-                          <button
-                            key={idx}
-                            onClick={() => handleSelectSample(url)}
+             <div className="flex-1 overflow-x-auto p-6 custom-scrollbar scrollbar-hide select-none"
+                ref={scrollContainerRef}
+                onMouseDown={handleMouseDown}
+                onMouseLeave={handleMouseLeave}
+                onMouseUp={handleMouseUp}
+                onMouseMove={handleMouseMove}
+                style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+             >
+                <div className="flex gap-4 pb-4">
+                   {/* Custom Upload Card */}
+                   <label className={`flex-shrink-0 relative w-[200px] aspect-video rounded-md overflow-hidden border-2 border-dashed transition-all group flex flex-col items-center justify-center cursor-pointer hover:bg-muted/50 ${
+                      assets?.backgroundImage && !SAMPLE_IMAGES.includes(assets.backgroundImage) 
+                        ? "border-primary ring-2 ring-primary ring-offset-2 bg-muted/20" 
+                        : "border-muted-foreground/25 hover:border-primary/50"
+                   }`}>
+                        <input 
+                            type="file" 
+                            className="hidden" 
+                            accept="image/*"
+                            onChange={handleFileUpload}
                             disabled={isUploading}
-                            className={`flex-shrink-0 relative w-[200px] aspect-video rounded-md overflow-hidden border-2 transition-all group snap-start ${
-                              assets?.backgroundImage === url 
-                                ? "border-primary ring-2 ring-primary ring-offset-2" 
-                                : "border-transparent hover:border-primary/50"
-                            }`}
-                          >
-                            <img 
-                              src={url} 
-                              alt={`Sample ${idx + 1}`} 
-                              className="w-full h-full object-cover transition-transform group-hover:scale-110"
-                            />
-                            {isUploading && assets?.backgroundImage === url && (
-                               <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                                  <Loader2 className="w-6 h-6 animate-spin text-white" />
-                               </div>
-                            )}
-                            {assets?.backgroundImage === url && (
-                              <div className="absolute top-1 right-1 bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded-full font-bold shadow-sm">
-                                ACTIVE
-                              </div>
-                            )}
-                          </button>
-                      ))}
-                   </div>
-                ) : (
-                   <div className="h-full flex flex-col items-center justify-center border-2 border-dashed rounded-lg border-muted-foreground/25 bg-muted/50 hover:bg-muted/80 transition-colors relative group/upload">
-                      {assets?.backgroundImage && !SAMPLE_IMAGES.includes(assets.backgroundImage) ? (
-                         <div className="relative w-full h-full rounded-lg overflow-hidden">
-                            <img src={assets.backgroundImage} className="w-full h-full object-cover opacity-50" />
-                            <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                <p className="text-sm font-medium mb-2">Current Custom Image</p>
-                                <label className="cursor-pointer">
-                                    <input 
-                                        type="file" 
-                                        className="hidden" 
-                                        accept="image/*"
-                                        onChange={handleFileUpload}
-                                        disabled={isUploading}
-                                    />
-                                    <div className="bg-primary text-primary-foreground px-4 py-2 rounded-md shadow-sm flex items-center gap-2 hover:opacity-90 transition-opacity">
-                                         {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImagePlus className="w-4 h-4" />}
-                                        <span>Change Image</span>
-                                    </div>
-                                </label>
-                            </div>
-                         </div>
-                      ) : (
-                          <div className="flex flex-col items-center justify-center text-center p-6">
-                            <ImageIcon className="w-10 h-10 text-muted-foreground/50 mb-3" />
-                            <p className="text-sm font-medium text-muted-foreground mb-3">Upload your own background</p>
-                            <label className="cursor-pointer">
-                              <input 
-                                  type="file" 
-                                  className="hidden" 
-                                  accept="image/*"
-                                  onChange={handleFileUpload}
-                                  disabled={isUploading}
-                              />
-                              <div className="bg-primary text-primary-foreground px-4 py-2 rounded-md shadow-sm flex items-center gap-2 hover:opacity-90 transition-opacity">
-                                   {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-                                  <span>Choose File</span>
-                              </div>
-                            </label>
+                        />
+                        {isUploading ? (
+                            <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+                        ) : (
+                            <>
+                                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center mb-2 group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                                    <Plus className="w-5 h-5" />
+                                </div>
+                                <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground">Upload Custom</span>
+                            </>
+                        )}
+                        {assets?.backgroundImage && !SAMPLE_IMAGES.includes(assets.backgroundImage) && (
+                           <div className="absolute inset-0 z-[-1]">
+                               <img src={assets.backgroundImage} className="w-full h-full object-cover opacity-50" />
+                           </div>
+                        )}
+                   </label>
+
+                   {/* Sample Images */}
+                   {SAMPLE_IMAGES.map((url, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => handleSelectSample(url)}
+                        disabled={isUploading}
+                        className={`flex-shrink-0 relative w-[200px] aspect-video rounded-md overflow-hidden border-2 transition-all group select-none ${
+                          assets?.backgroundImage === url 
+                            ? "border-primary ring-2 ring-primary ring-offset-2" 
+                            : "border-transparent hover:border-primary/50"
+                        }`}
+                        onDragStart={(e) => e.preventDefault()}
+                      >
+                        <img 
+                          src={url} 
+                          alt={`Sample ${idx + 1}`} 
+                          className="w-full h-full object-cover transition-transform group-hover:scale-110 select-none pointer-events-none"
+                        />
+                        {isUploading && assets?.backgroundImage === url && (
+                           <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                              <Loader2 className="w-6 h-6 animate-spin text-white" />
+                           </div>
+                        )}
+                        {assets?.backgroundImage === url && (
+                          <div className="absolute top-1 right-1 bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded-full font-bold shadow-sm">
+                            ACTIVE
                           </div>
-                      )}
-                   </div>
-                )}
+                        )}
+                      </button>
+                   ))}
+                </div>
              </div>
           </div>
         </div>
