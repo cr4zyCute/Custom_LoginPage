@@ -5,7 +5,16 @@ import { Theme } from "@prisma/client"
 import { ThemeConfig } from "@/types/theme"
 import { ThemeCard, ThemePreview } from "./theme-card"
 import { Button } from "@/components/ui/button"
-import { X, ChevronLeft, ChevronRight, Image as ImageIcon, Upload, ImagePlus, Loader2 } from "lucide-react"
+import { X, ChevronLeft, ChevronRight, Image as ImageIcon, Upload, ImagePlus, Loader2, Grid2X2 } from "lucide-react"
+
+const SAMPLE_IMAGES = [
+  "https://images.unsplash.com/photo-1603909223429-69bb7101f420?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80", // Forest (Dark)
+  "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=2070&q=80", // Fern (Light)
+  "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=2070&q=80", // Abstract Green
+  "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=2070&q=80", // Mountains
+  "https://images.unsplash.com/photo-1550684847-75bdda21cc95?auto=format&fit=crop&w=2070&q=80", // Geometric
+  "https://images.unsplash.com/photo-1497250681960-ef046c08a56e?auto=format&fit=crop&w=2070&q=80"  // Plant
+]
 import { useFormStatus } from "react-dom"
 import { motion, AnimatePresence, Variants } from "framer-motion"
 import { uploadFile } from "@/actions/upload-actions"
@@ -112,7 +121,7 @@ function ThemeDetailsModal({ theme, onClose, activateAction }: { theme: Theme, o
 
   const slides = [
     { type: 'preview', label: 'Schematic' },
-    { type: 'placeholder', label: 'Mobile' },
+    { type: 'gallery', label: 'Gallery' },
     { type: 'custom', label: 'Background' }
   ]
 
@@ -142,6 +151,13 @@ function ThemeDetailsModal({ theme, onClose, activateAction }: { theme: Theme, o
         console.error("Upload failed:", uploadRes.error)
         // Ideally show a toast here
     }
+    setIsUploading(false)
+  }
+
+  const handleSelectSample = async (url: string) => {
+    setIsUploading(true)
+    await updateThemeBackground(theme.id, url)
+    router.refresh()
     setIsUploading(false)
   }
 
@@ -216,18 +232,44 @@ function ThemeDetailsModal({ theme, onClose, activateAction }: { theme: Theme, o
               
               {currentSlide === 1 && (
                 <motion.div
-                  key="placeholder"
+                  key="gallery"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.2 }}
-                  className="w-full h-full flex flex-col items-center justify-center bg-muted/20"
+                  className="w-full h-full flex flex-col items-center justify-center bg-muted/20 p-6 overflow-y-auto"
                 >
-                  <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
-                    <ImageIcon className="w-8 h-8 text-muted-foreground" />
+                  <h3 className="text-lg font-semibold mb-4 text-center">Select Background</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 w-full max-w-lg">
+                    {SAMPLE_IMAGES.map((url, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => handleSelectSample(url)}
+                        disabled={isUploading}
+                        className={`relative aspect-video rounded-md overflow-hidden border-2 transition-all group ${
+                          assets?.backgroundImage === url 
+                            ? "border-primary ring-2 ring-primary ring-offset-2" 
+                            : "border-transparent hover:border-primary/50"
+                        }`}
+                      >
+                        <img 
+                          src={url} 
+                          alt={`Sample ${idx + 1}`} 
+                          className="w-full h-full object-cover transition-transform group-hover:scale-110"
+                        />
+                        {isUploading && assets?.backgroundImage === url && (
+                           <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                              <Loader2 className="w-6 h-6 animate-spin text-white" />
+                           </div>
+                        )}
+                        {assets?.backgroundImage === url && (
+                          <div className="absolute top-1 right-1 bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded-full font-bold shadow-sm">
+                            ACTIVE
+                          </div>
+                        )}
+                      </button>
+                    ))}
                   </div>
-                  <p className="text-sm font-medium text-muted-foreground">Mobile Preview</p>
-                  <p className="text-xs text-muted-foreground/60 mt-1">Coming Soon</p>
                 </motion.div>
               )}
 
@@ -312,7 +354,7 @@ function ThemeDetailsModal({ theme, onClose, activateAction }: { theme: Theme, o
                     )}
                     {idx === 1 && (
                         <div className="w-full h-full bg-muted/20 flex items-center justify-center">
-                             <ImageIcon className="w-4 h-4 text-muted-foreground" />
+                             <Grid2X2 className="w-4 h-4 text-muted-foreground" />
                         </div>
                     )}
                     {idx === 2 && (

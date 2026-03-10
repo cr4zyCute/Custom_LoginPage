@@ -43,6 +43,14 @@ export async function updateThemeBackground(themeId: string, backgroundUrl: stri
     }
 
     config.assets.backgroundImage = backgroundUrl;
+    // Also update sidebar image to match, so the theme looks consistent
+    config.assets.sidebarImage = backgroundUrl;
+
+    // If darkAssets exists, update it too to ensure consistency when user explicitly changes background
+    if (config.darkAssets) {
+        config.darkAssets.backgroundImage = backgroundUrl;
+        config.darkAssets.sidebarImage = backgroundUrl;
+    }
 
     await prisma.theme.update({
       where: { id: themeId },

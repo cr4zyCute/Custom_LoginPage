@@ -9,9 +9,11 @@ const createConfig = (base: any, overrides: any) => {
   return {
     ...base,
     colors: { ...base.colors, ...overrides.colors },
+    darkColors: overrides.darkColors ? { ...overrides.darkColors } : undefined,
     typography: { ...base.typography, ...overrides.typography },
     components: { ...base.components, ...overrides.components },
-    assets: { ...base.assets, ...overrides.assets }
+    assets: { ...base.assets, ...overrides.assets },
+    darkAssets: overrides.darkAssets ? { ...overrides.darkAssets } : undefined
   }
 }
 
@@ -117,7 +119,21 @@ const premiumConfig = createConfig(baseConfig, {
 
 const healthcareGreenConfig = createConfig(baseConfig, {
   colors: {
-    background: "#050902",           // Deep background
+    background: "#F2F9F5",           // Very light green tint (Light Mode)
+    foreground: "#050902",           // Dark text
+    primary: "#4C8527",              // Leaf Green (Brighter)
+    primaryForeground: "#FFFFFF",
+    secondary: "#E2EBE0",            // Light green secondary
+    secondaryForeground: "#16220F",
+    muted: "#DEE8DC",                // Muted background
+    mutedForeground: "#57763C",      // Muted text
+    border: "#B7D6A8",               // Soft green border
+    input: "#FFFFFF",                // White input
+    ring: "#4C8527",
+    radius: "2rem"
+  },
+  darkColors: {
+    background: "#050902",           // Deep background (Dark Mode)
     foreground: "#D2E3DA",           // Text / light contrast
     primary: "#2E5216",              // Buttons / highlights (Leaf Green)
     primaryForeground: "#D2E3DA",    // Text on button
@@ -128,7 +144,7 @@ const healthcareGreenConfig = createConfig(baseConfig, {
     border: "#57763C",               // Plant accent (Natural Green)
     input: "#22301B",                // Cards / panels (Dark Green)
     ring: "#57763C",                 // Plant accent
-    radius: "2rem"                   // Pill shape buttons
+    radius: "2rem"
   },
   typography: {
     fontFamily: "Inter, sans-serif",
@@ -151,8 +167,12 @@ const healthcareGreenConfig = createConfig(baseConfig, {
     }
   },
   assets: {
+    backgroundImage: "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=2070&q=80", // Light fern
+    sidebarImage: "https://images.unsplash.com/photo-1497250681960-ef046c08a56e?auto=format&fit=crop&w=2070&q=80" // Light plant
+  },
+  darkAssets: {
     backgroundImage: "https://images.unsplash.com/photo-1603909223429-69bb7101f420?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
-    sidebarImage: "https://images.unsplash.com/photo-1615486363973-9a7877b3f2ae?auto=format&fit=crop&w=900&q=80"
+    sidebarImage: "https://images.unsplash.com/photo-1603909223429-69bb7101f420?ixlib=rb-4.0.3&auto=format&fit=crop&w=900&q=80" // Use same forest image for consistency
   }
 })
 

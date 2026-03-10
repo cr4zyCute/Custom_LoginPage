@@ -20,6 +20,24 @@ export interface ThemeConfig {
     ring: string;
     radius: string; // e.g., "0.5rem"
   };
+  darkColors?: {
+    primary: string;
+    primaryForeground?: string;
+    secondary: string;
+    secondaryForeground?: string;
+    background: string;
+    foreground: string;
+    muted: string;
+    mutedForeground: string;
+    accent?: string;
+    accentForeground?: string;
+    destructive?: string;
+    destructiveForeground?: string;
+    border: string;
+    input: string;
+    ring: string;
+    radius: string;
+  };
   typography: {
     fontFamily: string;
     headingFont: string;
@@ -41,6 +59,12 @@ export interface ThemeConfig {
     };
   };
   assets?: {
+    logo?: string;
+    backgroundImage?: string;
+    sidebarImage?: string;
+    overlayOpacity?: number; // 0 to 1
+  };
+  darkAssets?: {
     logo?: string;
     backgroundImage?: string;
     sidebarImage?: string;

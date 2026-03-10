@@ -6,9 +6,10 @@ import { Theme, ThemeConfig } from "@/types/theme"
 
 interface ThemeContextType {
   theme: Theme | null
+  isDark: boolean
 }
 
-const ThemeContext = React.createContext<ThemeContextType>({ theme: null })
+const ThemeContext = React.createContext<ThemeContextType>({ theme: null, isDark: false })
 
 interface ThemeProviderProps {
   children: React.ReactNode
@@ -17,6 +18,7 @@ interface ThemeProviderProps {
 
 export function ThemeProvider({ children, initialTheme }: ThemeProviderProps) {
   const [theme, setTheme] = React.useState<Theme | null>(initialTheme || null)
+  const [isDark, setIsDark] = React.useState(false)
   const pathname = usePathname()
 
   // Sync state when prop changes (Crucial for real-time updates)
@@ -106,23 +108,44 @@ export function ThemeProvider({ children, initialTheme }: ThemeProviderProps) {
           ? JSON.parse(rawConfig) 
           : rawConfig as ThemeConfig
 
-        // Apply colors
-        Object.entries(config.colors).forEach(([key, value]) => {
-          // Map seed keys to CSS variable names
-          const varName = key === 'mutedForeground' ? 'muted-foreground' : 
-                          key === 'primaryForeground' ? 'primary-foreground' :
-                          key === 'secondaryForeground' ? 'secondary-foreground' :
-                          key === 'accentForeground' ? 'accent-foreground' :
-                          key === 'destructiveForeground' ? 'destructive-foreground' :
-                          key;
-          
-          root.style.setProperty(`--${varName}`, value)
-        })
+        // Helper to apply colors
+        const applyColors = (colors: ThemeConfig['colors']) => {
+          Object.entries(colors).forEach(([key, value]) => {
+            const varName = key === 'mutedForeground' ? 'muted-foreground' : 
+                            key === 'primaryForeground' ? 'primary-foreground' :
+                            key === 'secondaryForeground' ? 'secondary-foreground' :
+                            key === 'accentForeground' ? 'accent-foreground' :
+                            key === 'destructiveForeground' ? 'destructive-foreground' :
+                            key;
+            
+            root.style.setProperty(`--${varName}`, value)
+          })
+        }
+
+        // Apply colors based on system preference if darkColors exists
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+        
+        const updateTheme = () => {
+          setIsDark(mediaQuery.matches)
+          if (config.darkColors && mediaQuery.matches) {
+            applyColors(config.darkColors)
+          } else {
+            applyColors(config.colors)
+          }
+        }
+
+        // Initial apply
+        updateTheme()
+
+        // Listen for changes
+        mediaQuery.addEventListener('change', updateTheme)
 
         // Apply typography
         if (config.typography) {
             root.style.setProperty('--font-sans', config.typography.fontFamily)
         }
+        
+        return () => mediaQuery.removeEventListener('change', updateTheme)
 
       } catch (e) {
         console.error("Failed to parse theme config", e)
@@ -131,7 +154,7 @@ export function ThemeProvider({ children, initialTheme }: ThemeProviderProps) {
   }, [theme, pathname])
 
   return (
-    <ThemeContext.Provider value={{ theme }}>
+    <ThemeContext.Provider value={{ theme, isDark }}>
       {children}
     </ThemeContext.Provider>
   )

@@ -15,18 +15,19 @@ export default function LoginPage() {
       title="Login to your account" 
       description="Enter your email below to login to your account"
     >
-      <div className="absolute right-4 top-4 md:right-8 md:top-8">
-         <Link
-          href="/register"
-          className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
-        >
-          Register
-        </Link>
-      </div>
-     
       <LoginForm />
       
       <p className="px-8 text-center text-sm text-muted-foreground">
+        Don&apos;t have an account?{" "}
+        <Link
+          href="/register"
+          className="underline underline-offset-4 hover:text-primary font-medium"
+        >
+          Sign up here
+        </Link>
+      </p>
+
+      <p className="px-8 text-center text-[10px] text-muted-foreground/60">
         By clicking continue, you agree to our{" "}
         <Link
           href="/terms"

@@ -45,7 +45,11 @@ export function ThemeCard({ theme, onSelect }: ThemeCardProps) {
         className="aspect-video w-full relative border-b overflow-hidden"
         style={style}
       >
-        <ThemePreview layout={theme.layout} backgroundImage={assets?.backgroundImage} />
+        <ThemePreview 
+          layout={theme.layout} 
+          backgroundImage={assets?.backgroundImage} 
+          sidebarImage={assets?.sidebarImage} 
+        />
       </div>
 
       {/* Info & Action */}
