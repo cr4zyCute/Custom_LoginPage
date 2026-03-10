@@ -142,7 +142,7 @@ const healthcareGreenConfig = createConfig(baseConfig, {
     muted: "#16220F",                // Main dark UI background (Forest Green)
     mutedForeground: "#909875",      // Subtle UI accents (Olive Green)
     border: "#57763C",               // Plant accent (Natural Green)
-    input: "#22301B",                // Cards / panels (Dark Green)
+    input: "#1a1a1a",                // Neutral Dark Gray (was Dark Green)
     ring: "#57763C",                 // Plant accent
     radius: "2rem"
   },
