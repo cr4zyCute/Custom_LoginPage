@@ -309,8 +309,8 @@ function ThemeDetailsModal({ theme, onClose, activateAction }: { theme: Theme, o
             </div>
 
             {/* Right Side - Details */}
-            <div className="lg:w-2/5 flex flex-col bg-background h-full overflow-hidden">
-              <div className="flex-1 overflow-y-auto p-6 space-y-8">
+            <div className="lg:w-2/5 flex flex-col bg-white h-full overflow-hidden">
+              <div className="flex-1 overflow-y-auto p-6 pb-20 space-y-8">
                 
                 {/* About Section */}
                 <div className="space-y-3">
@@ -400,7 +400,7 @@ function ThemeDetailsModal({ theme, onClose, activateAction }: { theme: Theme, o
               initial={{ opacity: 0, scale: 0.9, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 10 }}
-              className="relative w-full max-w-sm bg-background p-6 rounded-xl shadow-xl border border-border z-10 flex flex-col items-center text-center gap-4"
+              className="relative w-full max-w-sm bg-white text-slate-950 p-6 rounded-xl shadow-xl border border-border z-10 flex flex-col items-center text-center gap-4"
             >
               {modalState.type === 'confirm_save' && (
                 <>
