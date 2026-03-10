@@ -5,7 +5,7 @@ import { Theme } from "@prisma/client"
 import { ThemeConfig } from "@/types/theme"
 import { ThemeCard, ThemePreview } from "./theme-card"
 import { Button } from "@/components/ui/button"
-import { X, Image as ImageIcon, Upload, ImagePlus, Loader2, Plus } from "lucide-react"
+import { X, Image as ImageIcon, Upload, ImagePlus, Loader2, Plus, CheckCircle2, AlertCircle } from "lucide-react"
 
 const SAMPLE_IMAGES = [
   "https://images.unsplash.com/photo-1603909223429-69bb7101f420?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80", // Cannabis/Health Green
@@ -94,8 +94,16 @@ export function ThemesGrid({ themes, activateAction }: ThemesGridProps) {
   )
 }
 
+type ModalState = 
+  | { type: 'idle' }
+  | { type: 'confirm_save', url: string }
+  | { type: 'success_upload', url: string }
+  | { type: 'success_save' }
+  | { type: 'error', message: string }
+
 function ThemeDetailsModal({ theme, onClose, activateAction }: { theme: Theme, onClose: () => void, activateAction: (formData: FormData) => Promise<void> }) {
   const [isUploading, setIsUploading] = useState(false)
+  const [modalState, setModalState] = useState<ModalState>({ type: 'idle' })
   const router = useRouter()
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [isDragging, setIsDragging] = useState(false)
@@ -131,21 +139,25 @@ function ThemeDetailsModal({ theme, onClose, activateAction }: { theme: Theme, o
     formData.append("file", file)
 
     const uploadRes = await uploadFile(formData)
-    if (uploadRes.success && uploadRes.url) {
-        await updateThemeBackground(theme.id, uploadRes.url)
-        router.refresh()
-    } else {
-        console.error("Upload failed:", uploadRes.error)
-        // Ideally show a toast here
-    }
     setIsUploading(false)
+
+    if (uploadRes.success && uploadRes.url) {
+        setModalState({ type: 'success_upload', url: uploadRes.url })
+    } else {
+        setModalState({ type: 'error', message: uploadRes.error || "Upload failed" })
+    }
   }
 
-  const handleSelectSample = async (url: string) => {
+  const handleSelectSample = (url: string) => {
+    setModalState({ type: 'confirm_save', url })
+  }
+
+  const handleConfirmSave = async (url: string) => {
     setIsUploading(true)
     await updateThemeBackground(theme.id, url)
     router.refresh()
     setIsUploading(false)
+    setModalState({ type: 'success_save' })
   }
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -178,182 +190,287 @@ function ThemeDetailsModal({ theme, onClose, activateAction }: { theme: Theme, o
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
-        className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
       />
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
         transition={{ type: "spring", duration: 0.5, bounce: 0.3 }}
-        className="relative w-full max-w-5xl overflow-hidden shadow-2xl rounded-lg z-10"
-        style={{
-          ...style,
-          backgroundColor: "var(--preview-bg)",
-          color: "var(--preview-fg)",
-        }}
+        className="relative w-full max-w-5xl overflow-hidden shadow-2xl rounded-2xl z-10 bg-white text-slate-950 border border-border flex flex-col max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
       >
-      <div className="relative grid grid-cols-1 lg:grid-cols-5 h-[85vh] max-h-[800px]">
-        <button 
-          onClick={onClose}
-          className="absolute right-4 top-4 z-50 p-2 rounded-full hover:opacity-80 transition-opacity shadow-sm border bg-background"
-          style={{
-            backgroundColor: "var(--preview-bg)",
-            color: "var(--preview-fg)",
-            borderColor: "var(--preview-border)"
-          }}
-        >
-          <X className="w-5 h-5" />
-        </button>
-
-        {/* Left Side - Preview & Background Selection */}
-        <div className="lg:col-span-3 relative flex flex-col h-full border-r" style={{ borderColor: "var(--preview-border)" }}>
-          
-          {/* Top: Preview Area */}
-          <div className="flex-1 p-8 flex items-center justify-center min-h-0 bg-muted/5">
-             <div className="w-full aspect-video shadow-2xl rounded-lg overflow-hidden border relative bg-background" style={{ borderColor: "var(--preview-border)" }}>
-                <ThemePreview layout={theme.layout} scale={3} backgroundImage={assets?.backgroundImage} sidebarImage={assets?.sidebarImage} />
-             </div>
-          </div>
-
-          {/* Bottom: Background Selection */}
-          <div className="h-[350px] bg-background/50 border-t flex flex-col backdrop-blur-sm" style={{ borderColor: "var(--preview-border)" }}>
-             <div className="flex-1 overflow-x-auto p-6 custom-scrollbar scrollbar-hide select-none"
-                ref={scrollContainerRef}
-                onMouseDown={handleMouseDown}
-                onMouseLeave={handleMouseLeave}
-                onMouseUp={handleMouseUp}
-                onMouseMove={handleMouseMove}
-                style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
-             >
-                <div className="flex gap-4 pb-4">
-                   {/* Custom Upload Card */}
-                   <label className={`flex-shrink-0 relative w-[200px] aspect-video rounded-md overflow-hidden border-2 border-dashed transition-all group flex flex-col items-center justify-center cursor-pointer hover:bg-muted/50 ${
-                      assets?.backgroundImage && !SAMPLE_IMAGES.includes(assets.backgroundImage) 
-                        ? "border-primary ring-2 ring-primary ring-offset-2 bg-muted/20" 
-                        : "border-muted-foreground/25 hover:border-primary/50"
-                   }`}>
-                        <input 
-                            type="file" 
-                            className="hidden" 
-                            accept="image/*"
-                            onChange={handleFileUpload}
-                            disabled={isUploading}
-                        />
-                        {isUploading ? (
-                            <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-                        ) : (
-                            <>
-                                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center mb-2 group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                                    <Plus className="w-5 h-5" />
-                                </div>
-                                <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground">Upload Custom</span>
-                            </>
-                        )}
-                        {assets?.backgroundImage && !SAMPLE_IMAGES.includes(assets.backgroundImage) && (
-                           <div className="absolute inset-0 z-[-1]">
-                               <img src={assets.backgroundImage} className="w-full h-full object-cover opacity-50" />
-                           </div>
-                        )}
-                   </label>
-
-                   {/* Sample Images */}
-                   {SAMPLE_IMAGES.map((url, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => handleSelectSample(url)}
-                        disabled={isUploading}
-                        className={`flex-shrink-0 relative w-[200px] aspect-video rounded-md overflow-hidden border-2 transition-all group select-none ${
-                          assets?.backgroundImage === url 
-                            ? "border-primary ring-2 ring-primary ring-offset-2" 
-                            : "border-transparent hover:border-primary/50"
-                        }`}
-                        onDragStart={(e) => e.preventDefault()}
-                      >
-                        <img 
-                          src={url} 
-                          alt={`Sample ${idx + 1}`} 
-                          className="w-full h-full object-cover transition-transform group-hover:scale-110 select-none pointer-events-none"
-                        />
-                        {isUploading && assets?.backgroundImage === url && (
-                           <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                              <Loader2 className="w-6 h-6 animate-spin text-white" />
-                           </div>
-                        )}
-                        {assets?.backgroundImage === url && (
-                          <div className="absolute top-1 right-1 bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded-full font-bold shadow-sm">
-                            ACTIVE
-                          </div>
-                        )}
-                      </button>
-                   ))}
-                </div>
-             </div>
-          </div>
-        </div>
-
-        {/* Right Side - Details */}
-        <div className="lg:col-span-2 p-6 flex flex-col h-full overflow-y-auto">
-          <div className="mb-6">
-            <div className="flex justify-between items-start mb-2">
-              <h2 className="text-2xl font-bold">{theme.name}</h2>
-              {theme.isPremium && (
-                <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full font-medium border border-yellow-200">
-                  PREMIUM
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b bg-muted/10">
+          <div className="flex items-center gap-3">
+             <h2 className="text-xl font-bold tracking-tight">{theme.name}</h2>
+             <div className="flex gap-2">
+                {theme.isPremium && (
+                  <span className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider border border-amber-200 dark:border-amber-800">
+                    Premium
+                  </span>
+                )}
+                <span className="bg-secondary text-secondary-foreground text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider border border-border">
+                   {theme.category}
                 </span>
-              )}
-            </div>
-            
-            <div className="flex flex-wrap gap-2 mb-4">
-              <span className="text-xs px-2.5 py-1 rounded-md bg-secondary text-secondary-foreground font-medium border">
-                {theme.category}
-              </span>
-              <span className="text-xs px-2.5 py-1 rounded-md bg-muted text-muted-foreground font-medium border">
-                {theme.layout}
-              </span>
-            </div>
-            
-            {theme.description && (
-              <p className="text-muted-foreground text-sm leading-relaxed">{theme.description}</p>
-            )}
+             </div>
           </div>
-
-          <div className="space-y-4 mb-6">
-            <h3 className="text-sm font-semibold flex items-center gap-2">
-              Color Palette
-              <span className="text-xs font-normal text-muted-foreground">({Object.keys(colors).filter(k => k !== 'radius').length} colors)</span>
-            </h3>
-            <div className="grid grid-cols-1 gap-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-              {Object.entries(colors).map(([key, value]) => {
-                if (typeof value !== 'string' || key === 'radius') return null;
-                return (
-                  <div key={key} className="flex items-center gap-3 p-2 rounded-md border bg-background/50 hover:bg-background transition-colors">
-                    <div 
-                      className="w-8 h-8 rounded-full shadow-sm border shrink-0" 
-                      style={{ backgroundColor: value }}
-                    />
-                    <div className="flex flex-col min-w-0">
-                      <span className="text-xs font-medium capitalize truncate">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
-                      <span className="text-[10px] text-muted-foreground uppercase font-mono">{value}</span>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-
-          <div className="mt-auto pt-4 border-t" style={{ borderColor: "var(--preview-border)" }}>
-            <form action={async (formData) => {
-                await activateAction(formData);
-                onClose();
-            }}>
-                <input type="hidden" name="themeId" value={theme.id} />
-                <ModalSubmitButton isActive={theme.isActive} />
-            </form>
-          </div>
+          <button 
+            onClick={onClose}
+            className="p-2 rounded-full hover:bg-muted transition-colors text-muted-foreground hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
-      </div>
+
+        <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
+            {/* Left Side - Preview & Background Selection */}
+            <div className="lg:w-3/5 flex flex-col border-b lg:border-b-0 lg:border-r bg-muted/5 relative overflow-hidden">
+              
+              {/* Preview Area */}
+              <div className="flex-1 p-8 flex items-center justify-center min-h-[300px] lg:min-h-0 relative">
+                 {/* CSS Variables Wrapper for Preview */}
+                 <div 
+                    className="w-full aspect-video shadow-2xl rounded-xl overflow-hidden border bg-background relative transition-all duration-500 hover:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.25)]"
+                    style={style}
+                 >
+                    <ThemePreview layout={theme.layout} scale={3} backgroundImage={assets?.backgroundImage} sidebarImage={assets?.sidebarImage} />
+                 </div>
+              </div>
+
+              {/* Background Selection Strip */}
+              <div className="h-[140px] bg-background border-t flex flex-col">
+                 <div className="px-4 py-2 border-b">
+                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Background Assets</span>
+                 </div>
+                 <div className="flex-1 overflow-x-auto p-4 flex items-center gap-3 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+                    ref={scrollContainerRef}
+                    onMouseDown={handleMouseDown}
+                    onMouseLeave={handleMouseLeave}
+                    onMouseUp={handleMouseUp}
+                    onMouseMove={handleMouseMove}
+                    style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+                 >
+                    {/* Custom Upload Card */}
+                    <label className={`flex-shrink-0 relative w-[120px] h-[80px] rounded-lg overflow-hidden border-2 border-dashed transition-all group flex flex-col items-center justify-center cursor-pointer hover:bg-accent ${
+                       assets?.backgroundImage && !SAMPLE_IMAGES.includes(assets.backgroundImage) 
+                         ? "border-primary bg-primary/5" 
+                         : "border-muted-foreground/25 hover:border-primary/50"
+                    }`}>
+                         <input 
+                             type="file" 
+                             className="hidden" 
+                             accept="image/*"
+                             onChange={handleFileUpload}
+                             disabled={isUploading}
+                         />
+                         {isUploading ? (
+                             <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                         ) : (
+                             <div className="flex flex-col items-center gap-1">
+                                 <Plus className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                                 <span className="text-[10px] font-medium text-muted-foreground group-hover:text-primary">Upload</span>
+                             </div>
+                         )}
+                    </label>
+
+                    {/* Sample Images */}
+                    {SAMPLE_IMAGES.map((url, idx) => (
+                       <button
+                         key={idx}
+                         onClick={() => handleSelectSample(url)}
+                         disabled={isUploading}
+                         className={`flex-shrink-0 relative w-[120px] h-[80px] rounded-lg overflow-hidden border-2 transition-all group select-none ${
+                           assets?.backgroundImage === url 
+                             ? "border-primary ring-2 ring-primary/20" 
+                             : "border-transparent hover:border-primary/50"
+                         }`}
+                         onDragStart={(e) => e.preventDefault()}
+                       >
+                         <img 
+                           src={url} 
+                           alt={`Sample ${idx + 1}`} 
+                           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                         />
+                         {isUploading && assets?.backgroundImage === url && (
+                            <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                               <Loader2 className="w-4 h-4 animate-spin text-white" />
+                            </div>
+                         )}
+                         {assets?.backgroundImage === url && (
+                           <div className="absolute top-1 right-1 bg-primary text-primary-foreground text-[8px] px-1.5 py-0.5 rounded-full font-bold shadow-sm">
+                             ACTIVE
+                           </div>
+                         )}
+                       </button>
+                    ))}
+                 </div>
+              </div>
+            </div>
+
+            {/* Right Side - Details */}
+            <div className="lg:w-2/5 flex flex-col bg-background h-full overflow-hidden">
+              <div className="flex-1 overflow-y-auto p-6 space-y-8">
+                
+                {/* About Section */}
+                <div className="space-y-3">
+                  <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider flex items-center gap-2">
+                    About this theme
+                  </h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {theme.description || "A professionally designed theme with carefully selected colors and assets to enhance your brand identity."}
+                  </p>
+                  
+                  <div className="flex flex-wrap gap-2 pt-2">
+                     <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded border">
+                        <span className="w-2 h-2 rounded-full bg-blue-500" />
+                        Layout: <span className="font-medium text-foreground">{theme.layout}</span>
+                     </div>
+                     <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded border">
+                        <span className="w-2 h-2 rounded-full bg-purple-500" />
+                        Type: <span className="font-medium text-foreground">{theme.isPremium ? "Premium" : "Standard"}</span>
+                     </div>
+                  </div>
+                </div>
+
+                {/* Color Palette */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">
+                      Color Palette
+                    </h3>
+                    <span className="text-xs text-muted-foreground">{Object.keys(colors).filter(k => k !== 'radius').length} colors</span>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-2">
+                    {Object.entries(colors).map(([key, value]) => {
+                      if (typeof value !== 'string' || key === 'radius') return null;
+                      return (
+                        <div key={key} className="group flex items-center gap-3 p-2 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
+                          <div 
+                            className="w-10 h-10 rounded-md shadow-sm border shrink-0 relative overflow-hidden ring-1 ring-inset ring-black/5 dark:ring-white/10" 
+                            style={{ backgroundColor: value }}
+                          >
+                             <div className="absolute inset-0 bg-gradient-to-tr from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                          </div>
+                          <div className="flex flex-col min-w-0 flex-1">
+                            <span className="text-xs font-semibold capitalize truncate text-foreground">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
+                            <span className="text-[10px] text-muted-foreground uppercase font-mono">{value}</span>
+                          </div>
+                          <button 
+                             className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-background rounded-md transition-all text-muted-foreground hover:text-foreground"
+                             onClick={() => navigator.clipboard.writeText(value)}
+                             title="Copy Color"
+                          >
+                             <div className="w-3 h-3 border-2 border-current rounded-[1px]" />
+                          </button>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer Actions */}
+              <div className="p-6 border-t bg-muted/10 mt-auto">
+                <form action={async (formData) => {
+                    await activateAction(formData);
+                    onClose();
+                }}>
+                    <input type="hidden" name="themeId" value={theme.id} />
+                    <ModalSubmitButton isActive={theme.isActive} />
+                </form>
+              </div>
+            </div>
+        </div>
       </motion.div>
+
+      {/* Confirmation/Status Modals */}
+      <AnimatePresence>
+        {modalState.type !== 'idle' && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/40 backdrop-blur-[1px]"
+              onClick={() => modalState.type === 'error' ? setModalState({ type: 'idle' }) : null}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 10 }}
+              className="relative w-full max-w-sm bg-background p-6 rounded-xl shadow-xl border border-border z-10 flex flex-col items-center text-center gap-4"
+            >
+              {modalState.type === 'confirm_save' && (
+                <>
+                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-2">
+                    <CheckCircle2 className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-lg font-semibold">Save Changes?</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Do you want to update the theme background?
+                  </p>
+                  <div className="flex gap-3 w-full mt-2">
+                    <Button variant="outline" className="flex-1" onClick={() => setModalState({ type: 'idle' })}>
+                      Cancel
+                    </Button>
+                    <Button className="flex-1" onClick={() => handleConfirmSave(modalState.url)}>
+                      {isUploading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                      Save
+                    </Button>
+                  </div>
+                </>
+              )}
+
+              {modalState.type === 'success_upload' && (
+                <>
+                  <div className="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400 mb-2">
+                    <CheckCircle2 className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-lg font-semibold">Successfully Uploaded</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Your image has been uploaded successfully.
+                  </p>
+                  <Button className="w-full mt-2" onClick={() => setModalState({ type: 'confirm_save', url: modalState.url })}>
+                    Continue
+                  </Button>
+                </>
+              )}
+
+              {modalState.type === 'success_save' && (
+                <>
+                  <div className="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400 mb-2">
+                    <CheckCircle2 className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-lg font-semibold">Successfully Changed</h3>
+                  <p className="text-sm text-muted-foreground">
+                    The theme background has been updated.
+                  </p>
+                  <Button className="w-full mt-2" onClick={() => setModalState({ type: 'idle' })}>
+                    Done
+                  </Button>
+                </>
+              )}
+
+              {modalState.type === 'error' && (
+                <>
+                  <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-600 dark:text-red-400 mb-2">
+                    <AlertCircle className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-lg font-semibold">Failed</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {modalState.message}
+                  </p>
+                  <Button variant="destructive" className="w-full mt-2" onClick={() => setModalState({ type: 'idle' })}>
+                    Close
+                  </Button>
+                </>
+              )}
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

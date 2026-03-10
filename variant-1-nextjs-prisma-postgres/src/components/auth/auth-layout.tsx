@@ -5,6 +5,7 @@ import * as React from "react"
 import { useTheme } from "@/components/theme-provider"
 import { cn } from "@/lib/utils"
 import { ThemeConfig } from "@/types/theme"
+import { motion, AnimatePresence } from "framer-motion"
 
 interface AuthLayoutProps {
   children: React.ReactNode
@@ -37,7 +38,11 @@ export function AuthLayout({ children, title, description }: AuthLayoutProps) {
 
   // Common Form Container
   const FormContainer = (
-    <div className={cn(
+    <motion.div 
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      className={cn(
       "flex w-full flex-col justify-center space-y-6 sm:w-[350px] mx-auto relative z-10",
       isPlantie && isDark && "text-white",
       isPlantie && !isDark && "text-foreground"
@@ -59,7 +64,7 @@ export function AuthLayout({ children, title, description }: AuthLayoutProps) {
         </p>
       </div>
       {children}
-    </div>
+    </motion.div>
   )
 
   // Side Panel (Image/Brand)
@@ -118,27 +123,50 @@ export function AuthLayout({ children, title, description }: AuthLayoutProps) {
     return (
       <div className="relative h-screen flex items-center justify-center bg-muted overflow-hidden">
          {/* Background Image Layer */}
-         {isPlantie || backgroundImage ? (
-             <>
-                <div 
-                  className="absolute inset-0 bg-cover bg-center z-0 scale-105"
-                  style={{ 
-                      backgroundImage: backgroundImage ? `url("${backgroundImage}")` : 'url("https://images.unsplash.com/photo-1603909223429-69bb7101f420?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80")',
-                      filter: (isPlantie && !isDark) 
-                          ? 'brightness(0.95) contrast(1.05)' 
-                          : 'brightness(0.25) contrast(1.1)'
-                  }}
-                />
-                {/* Decorative Elements */}
-                <div className={cn("absolute top-0 left-0 w-full h-full z-0 pointer-events-none", isDark ? "bg-gradient-to-b from-black/50 via-transparent to-black/80" : "bg-gradient-to-b from-white/30 via-transparent to-white/50")} />
-                
-                {/* Plantie Header Removed */}
+         <AnimatePresence>
+           {(isPlantie || backgroundImage) && (
+              <motion.div 
+                key={backgroundImage || "default-bg"}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.7 }}
+                className="absolute inset-0 bg-cover bg-center z-0 scale-105"
+                style={{ 
+                    backgroundImage: backgroundImage ? `url("${backgroundImage}")` : 'url("https://images.unsplash.com/photo-1603909223429-69bb7101f420?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80")',
+                    filter: (isPlantie && !isDark) 
+                        ? 'brightness(0.95) contrast(1.05)' 
+                        : 'brightness(0.25) contrast(1.1)'
+                }}
+              />
+           )}
+         </AnimatePresence>
+         
+         <AnimatePresence>
+           {(isPlantie || backgroundImage) && (
+              <motion.div 
+                key={`overlay-${isDark}`}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.5 }}
+                className={cn("absolute top-0 left-0 w-full h-full z-0 pointer-events-none", isDark ? "bg-gradient-to-b from-black/50 via-transparent to-black/80" : "bg-gradient-to-b from-white/30 via-transparent to-white/50")} 
+              />
+           )}
+         </AnimatePresence>
 
-                {/* Plantie Logo Removed */}
-             </>
-         ) : (
-            <div className="absolute inset-0 bg-primary/10 backdrop-blur-sm" />
-         )}
+         <AnimatePresence>
+           {!(isPlantie || backgroundImage) && (
+              <motion.div 
+                key="no-bg-fallback"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.5 }}
+                className="absolute inset-0 bg-primary/10 backdrop-blur-sm" 
+              />
+           )}
+         </AnimatePresence>
 
         {/* Form Card */}
         <div className={cn(
@@ -155,16 +183,23 @@ export function AuthLayout({ children, title, description }: AuthLayoutProps) {
           )}>
             {(isPlantie || sidebarImage) && (
               <div className="relative hidden md:block">
-                <div
-                  className="absolute inset-0 bg-cover bg-center transition-all duration-700"
-                  style={{
-                    backgroundImage: sidebarImage 
-                        ? `url("${sidebarImage}")` 
-                        : 'url("https://images.unsplash.com/photo-1615486363973-9a7877b3f2ae?auto=format&fit=crop&w=900&q=80")',
-                    filter: isDark ? "brightness(0.85) contrast(1.1)" : "brightness(0.95) contrast(1.05)",
-                  }}
-                />
-                <div className={cn("absolute inset-0", isDark ? "bg-gradient-to-t from-black/80 via-black/20 to-transparent" : "bg-gradient-to-tr from-white/60 via-white/20 to-transparent")} />
+                <AnimatePresence>
+                   <motion.div
+                     key={sidebarImage || "default-sidebar"}
+                     initial={{ opacity: 0 }}
+                     animate={{ opacity: 1 }}
+                     exit={{ opacity: 0 }}
+                     transition={{ duration: 0.7 }}
+                     className="absolute inset-0 bg-cover bg-center"
+                     style={{
+                       backgroundImage: sidebarImage 
+                           ? `url("${sidebarImage}")` 
+                           : 'url("https://images.unsplash.com/photo-1615486363973-9a7877b3f2ae?auto=format&fit=crop&w=900&q=80")',
+                       filter: isDark ? "brightness(0.85) contrast(1.1)" : "brightness(0.95) contrast(1.05)",
+                     }}
+                   />
+                </AnimatePresence>
+                <div className={cn("absolute inset-0 pointer-events-none", isDark ? "bg-gradient-to-t from-black/80 via-black/20 to-transparent" : "bg-gradient-to-tr from-white/60 via-white/20 to-transparent")} />
               </div>
             )}
 
