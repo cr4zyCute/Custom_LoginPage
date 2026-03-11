@@ -334,39 +334,104 @@ function ThemeDetailsModal({ theme, onClose, activateAction }: { theme: Theme, o
                 </div>
 
                 {/* Color Palette */}
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">
-                      Color Palette
+                <div className="space-y-6 pb-8">
+                  <div className="flex items-center justify-between border-b pb-2">
+                    <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-primary" />
+                      Color System
                     </h3>
-                    <span className="text-xs text-muted-foreground">{Object.keys(colors).filter(k => k !== 'radius').length} colors</span>
                   </div>
                   
-                  <div className="grid grid-cols-2 gap-2">
-                    {Object.entries(colors).map(([key, value]) => {
-                      if (typeof value !== 'string' || key === 'radius') return null;
-                      return (
-                        <div key={key} className="group flex items-center gap-3 p-2 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
-                          <div 
-                            className="w-10 h-10 rounded-md shadow-sm border shrink-0 relative overflow-hidden ring-1 ring-inset ring-black/5 dark:ring-white/10" 
-                            style={{ backgroundColor: value }}
-                          >
-                             <div className="absolute inset-0 bg-gradient-to-tr from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                          </div>
-                          <div className="flex flex-col min-w-0 flex-1">
-                            <span className="text-xs font-semibold capitalize truncate text-foreground">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
-                            <span className="text-[10px] text-muted-foreground uppercase font-mono">{value}</span>
-                          </div>
-                          <button 
-                             className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-background rounded-md transition-all text-muted-foreground hover:text-foreground"
-                             onClick={() => navigator.clipboard.writeText(value)}
-                             title="Copy Color"
-                          >
-                             <div className="w-3 h-3 border-2 border-current rounded-[1px]" />
-                          </button>
-                        </div>
-                      )
-                    })}
+                  {/* Brand Colors */}
+                  <div className="space-y-3">
+                    <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest pl-1">Brand Identity</h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {[
+                        { k: 'primary', l: 'Primary' }, 
+                        { k: 'secondary', l: 'Secondary' },
+                        { k: 'accent', l: 'Accent' }
+                      ].map(({ k, l }) => {
+                         const key = k as keyof typeof colors;
+                         const color = colors[key];
+                         const fgKey = `${k}Foreground` as keyof typeof colors;
+                         const fg = colors[fgKey];
+                         
+                         if (!color) return null;
+                         
+                         return (
+                           <div key={k} className="flex flex-col p-3 rounded-xl border bg-card/50 hover:bg-card hover:shadow-sm transition-all group">
+                              <div className="flex items-start justify-between mb-3">
+                                 <div className="flex flex-col">
+                                    <span className="text-sm font-semibold text-foreground">{l}</span>
+                                    <span className="text-[10px] text-muted-foreground font-mono uppercase">{color}</span>
+                                 </div>
+                                 <button 
+                                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 hover:bg-muted rounded-md"
+                                    onClick={() => navigator.clipboard.writeText(color)}
+                                    title="Copy Color"
+                                 >
+                                    <div className="w-3 h-3 border-2 border-current rounded-[1px] text-muted-foreground" />
+                                 </button>
+                              </div>
+                              <div className="flex items-center gap-2 mt-auto">
+                                 <div 
+                                   className="h-12 flex-1 rounded-lg shadow-sm border relative overflow-hidden flex items-center justify-center" 
+                                   style={{ backgroundColor: color }}
+                                 >
+                                    {fg && <span className="text-xs font-medium" style={{ color: fg }}>Aa</span>}
+                                 </div>
+                                 {fg && (
+                                    <div 
+                                      className="w-12 h-12 rounded-lg shadow-sm border relative overflow-hidden flex items-center justify-center" 
+                                      style={{ backgroundColor: fg }}
+                                      title={`Foreground: ${fg}`}
+                                    >
+                                       <span className="text-xs font-medium" style={{ color: color }}>Aa</span>
+                                    </div>
+                                 )}
+                              </div>
+                           </div>
+                         )
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Surface & UI Colors */}
+                  <div className="space-y-3">
+                    <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest pl-1">Interface & Surface</h4>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                       {[
+                         { k: 'background', l: 'Background' },
+                         { k: 'foreground', l: 'Text' },
+                         { k: 'muted', l: 'Muted' },
+                         { k: 'border', l: 'Border' },
+                         { k: 'input', l: 'Input' },
+                         { k: 'ring', l: 'Ring' },
+                         { k: 'destructive', l: 'Error' }
+                       ].map(({ k, l }) => {
+                          const key = k as keyof typeof colors;
+                          const color = colors[key];
+                          if (!color) return null;
+                          
+                          return (
+                            <div key={k} className="group relative flex flex-col gap-2 p-2 rounded-lg border bg-card/30 hover:bg-card hover:shadow-sm transition-all">
+                               <div 
+                                 className="w-full h-12 rounded-md shadow-sm border relative overflow-hidden group/color" 
+                                 style={{ backgroundColor: color }}
+                               >
+                                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/color:opacity-100 bg-black/10 backdrop-blur-[1px] transition-opacity cursor-pointer"
+                                       onClick={() => navigator.clipboard.writeText(color)}>
+                                     <span className="text-[10px] font-bold text-white drop-shadow-md">COPY</span>
+                                  </div>
+                               </div>
+                               <div className="flex flex-col px-1">
+                                  <span className="text-xs font-medium text-foreground truncate">{l}</span>
+                                  <span className="text-[10px] text-muted-foreground font-mono uppercase">{color}</span>
+                               </div>
+                            </div>
+                          )
+                       })}
+                    </div>
                   </div>
                 </div>
               </div>
