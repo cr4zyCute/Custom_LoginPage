@@ -28,8 +28,9 @@ export function AuthLayout({ children, title, description }: AuthLayoutProps) {
     }
   }
 
-  // Planti e Theme Detection
+  // Theme Detection
   const isPlantie = theme?.name === "Healthcare Green"
+  const isFinance = theme?.name === "Finance Gold"
   
   // Custom Background Image
   const activeAssets = (isDark && config?.darkAssets) ? config.darkAssets : config?.assets
@@ -44,21 +45,21 @@ export function AuthLayout({ children, title, description }: AuthLayoutProps) {
       transition={{ duration: 0.4, ease: "easeOut" }}
       className={cn(
       "flex w-full flex-col justify-center space-y-6 sm:w-[350px] mx-auto relative z-10",
-      isPlantie && isDark && "text-white",
-      isPlantie && !isDark && "text-foreground"
+      (isPlantie || isFinance) && isDark && "text-white",
+      (isPlantie || isFinance) && !isDark && "text-foreground"
     )}>
       <div className="flex flex-col space-y-2 text-center">
         <h1 className={cn(
           "text-2xl font-semibold tracking-tight",
-          isPlantie && isDark && "text-4xl font-bold tracking-tight mb-2 text-white",
-          isPlantie && !isDark && "text-4xl font-bold tracking-tight mb-2 text-foreground"
+          (isPlantie || isFinance) && isDark && "text-4xl font-bold tracking-tight mb-2 text-white",
+          (isPlantie || isFinance) && !isDark && "text-4xl font-bold tracking-tight mb-2 text-foreground"
         )}>
           {title}
         </h1>
         <p className={cn(
           "text-sm text-muted-foreground",
-          isPlantie && isDark && "text-gray-400",
-          isPlantie && !isDark && "text-muted-foreground"
+          (isPlantie || isFinance) && isDark && "text-gray-400",
+          (isPlantie || isFinance) && !isDark && "text-muted-foreground"
         )}>
           {description}
         </p>
@@ -74,6 +75,9 @@ export function AuthLayout({ children, title, description }: AuthLayoutProps) {
       {isPlantie && (
          <div className={cn("absolute inset-0 z-10", isDark ? "bg-black/60" : "bg-white/20")} /> 
       )}
+      {isFinance && (
+         <div className={cn("absolute inset-0 z-10", isDark ? "bg-black/80" : "bg-white/90 backdrop-blur-sm")} /> 
+      )}
       
       <div className="relative z-20 flex items-center text-lg font-medium text-foreground">
         {isPlantie ? (
@@ -82,6 +86,13 @@ export function AuthLayout({ children, title, description }: AuthLayoutProps) {
                     <span className="text-primary-foreground font-bold">P</span>
                 </div>
                 <span className={cn("font-bold tracking-wider", isDark ? "text-white" : "text-foreground")}>PLANTIE</span>
+             </div>
+        ) : isFinance ? (
+             <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
+                    <span className="text-primary-foreground font-serif font-bold italic">F</span>
+                </div>
+                <span className={cn("font-bold tracking-widest uppercase font-serif", isDark ? "text-white" : "text-foreground")}>FINANCE</span>
              </div>
         ) : (
              <>

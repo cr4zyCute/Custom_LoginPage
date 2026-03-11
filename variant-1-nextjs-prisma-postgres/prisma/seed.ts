@@ -107,16 +107,6 @@ const premiumConfig = createConfig(baseConfig, {
     }
 })
 
-// --- Custom Palette for Healthcare Green (Dark Plantie Theme) ---
-// Dark Background: #050902 (Deep background)
-// Forest Green: #16220F (Main dark UI background)
-// Dark Green: #22301B (Cards / panels)
-// Muted Green: #3E4F33 (Secondary UI areas)
-// Leaf Green: #2E5216 (Buttons / highlights)
-// Natural Green: #57763C (Plant accent)
-// Olive Green: #909875 (Subtle UI accents)
-// Soft Light: #D2E3DA (Text / light contrast)
-
 const healthcareGreenConfig = createConfig(baseConfig, {
   colors: {
     background: "#F2F9F5",           // Very light green tint (Light Mode)
@@ -173,6 +163,73 @@ const healthcareGreenConfig = createConfig(baseConfig, {
   darkAssets: {
     backgroundImage: "https://images.unsplash.com/photo-1603909223429-69bb7101f420?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
     sidebarImage: "https://images.unsplash.com/photo-1603909223429-69bb7101f420?ixlib=rb-4.0.3&auto=format&fit=crop&w=900&q=80" // Use same forest image for consistency
+  }
+})
+
+// --- Custom Palette for Finance Gold (Modern Premium) ---
+// Dark Background: #0A0A0B (Rich Black)
+// Gold: #D4AF37 (Classic Gold)
+// Muted Gold: #C5A028 (Darker Gold)
+// Light Gold: #F3E5AB (Champagne)
+// Slate: #1E293B (Dark Blue-Grey for panels)
+// Platinum: #E2E8F0 (Silver/White for text)
+
+const financeGoldConfig = createConfig(baseConfig, {
+  colors: {
+    background: "#FFFFFF",           // Clean White (Light Mode)
+    foreground: "#0F172A",           // Slate 900
+    primary: "#B45309",              // Amber 700 (Gold-like)
+    primaryForeground: "#FFFFFF",
+    secondary: "#F8FAFC",            // Slate 50
+    secondaryForeground: "#0F172A",
+    muted: "#F1F5F9",                // Slate 100
+    mutedForeground: "#64748B",      // Slate 500
+    border: "#E2E8F0",               // Slate 200
+    input: "#FFFFFF",                // White
+    ring: "#D97706",                 // Amber 600
+    radius: "0.5rem"                 // Modern slightly rounded
+  },
+  darkColors: {
+    background: "#020617",           // Slate 950 (Deep Blue Black)
+    foreground: "#F8FAFC",           // Slate 50
+    primary: "#F59E0B",              // Amber 500 (Bright Gold)
+    primaryForeground: "#020617",    // Dark text on Gold
+    secondary: "#1E293B",            // Slate 800
+    secondaryForeground: "#F8FAFC",
+    muted: "#0F172A",                // Slate 900
+    mutedForeground: "#94A3B8",      // Slate 400
+    border: "#334155",               // Slate 700
+    input: "#1E293B",                // Slate 800
+    ring: "#D97706",                 // Amber 600
+    radius: "0.5rem"
+  },
+  typography: {
+    fontFamily: "Inter, sans-serif",
+    headingFont: "Playfair Display, serif" // Elegant Serif for Headings
+  },
+  components: {
+    button: {
+      variant: "default",
+      radius: "0.5rem",
+      shadow: "0 4px 6px -1px rgba(245, 158, 11, 0.1), 0 2px 4px -1px rgba(245, 158, 11, 0.06)" // Golden Glow
+    },
+    card: {
+      radius: "0.75rem",
+      shadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+      border: true
+    },
+    input: {
+      variant: "default",
+      radius: "0.5rem"
+    }
+  },
+  assets: {
+    backgroundImage: "https://images.unsplash.com/photo-1620714223084-8fcacc6dfd8d?auto=format&fit=crop&w=2070&q=80", // Gold Abstract
+    sidebarImage: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=2070&q=80" // Finance/Graph
+  },
+  darkAssets: {
+    backgroundImage: "https://images.unsplash.com/photo-1639322537228-f710d846310a?auto=format&fit=crop&w=2070&q=80", // Dark Crypto/Gold
+    sidebarImage: "https://images.unsplash.com/photo-1611974765270-ca1258634369?auto=format&fit=crop&w=2070&q=80" // Dark Gold Texture
   }
 })
 
@@ -324,6 +381,8 @@ async function main() {
     let config = corporateConfig
     if (name === 'Healthcare Green') {
       config = healthcareGreenConfig
+    } else if (name === 'Finance Gold') {
+      config = financeGoldConfig
     }
 
     await prisma.theme.upsert({
